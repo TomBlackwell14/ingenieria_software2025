@@ -42,7 +42,7 @@
 
   <!-- Alerta de desviación -->
   {% with desv=desviacion_pct|default:0 umbral=umbral_alerta|default:10 %}
-  <section class="card" style="margin-bottom:16px;{{ desv|floatformat:1|add:'0'|floatformat:1 }};{% if desv|floatformat:2 > umbral|floatformat:2 %}border-color:#ffd2d2;background:#fff5f5{% endif %}">
+  <section class="card" style="margin-bottom:16px;{% if desv > umbral %}border-color:#ffd2d2;background:#fff5f5{% endif %}">
     <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
       <div>
         <strong>Desviación actual:</strong>
@@ -155,18 +155,24 @@
     <small>Descarga de inventario completo para análisis externos (Excel).</small>
 
     <form action="#" method="get" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <!-- PAISES -->
       <select name="pais" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:160px">
         <option value="">País: todos</option>
-        {% for p in paises|default:list %}
-          <option>{{ p }}</option>
-        {% endfor %}
+        {% if paises %}
+          {% for p in paises %}
+            <option>{{ p }}</option>
+          {% endfor %}
+        {% endif %}
       </select>
 
+      <!-- AÑOS -->
       <select name="year" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:140px">
         <option value="">Año: todos</option>
-        {% for y in years|default:list %}
-          <option>{{ y }}</option>
-        {% endfor %}
+        {% if years %}
+          {% for y in years %}
+            <option>{{ y }}</option>
+          {% endfor %}
+        {% endif %}
       </select>
 
       <select name="alcance" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:160px">
@@ -328,79 +334,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---------- Gráfico histórico (líneas) ----------
   const ctxHist = document.getElementById("chartHistorico");
-  new Chart(ctxHist, {
-    type: "line",
-    data: {
-      labels: labelsHistorico,
-      datasets: [
-        {
-          label: "Emisiones (tCO₂e)",
-          data: dataHistorico,
-          borderColor: "#1b7a4a",
-          backgroundColor: "rgba(122,202,163,0.25)",
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2
-        },
-        {
-          label: "Meta proyectada",
-          data: dataMeta,
-          borderColor: "#0d2a3e",
-          backgroundColor: "rgba(13,42,62,0.10)",
-          fill: false,
-          borderDash: [6,4],
-          tension: 0.3,
-          pointRadius: 0
+  if (ctxHist) {
+    new Chart(ctxHist, {
+      type: "line",
+      data: {
+        labels: labelsHistorico,
+        datasets: [
+          {
+            label: "Emisiones (tCO₂e)",
+            data: dataHistorico,
+            borderColor: "#1b7a4a",
+            backgroundColor: "rgba(122,202,163,0.25)",
+            fill: true,
+            tension: 0.3,
+            pointRadius: 2
+          },
+          {
+            label: "Meta proyectada",
+            data: dataMeta,
+            borderColor: "#0d2a3e",
+            backgroundColor: "rgba(13,42,62,0.10)",
+            fill: false,
+            borderDash: [6,4],
+            tension: 0.3,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { title: { display: true, text: "Año" }},
+          y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true } },
-      scales: {
-        x: { title: { display: true, text: "Año" }},
-        y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
       }
-    }
-  });
+    });
+  }
 
   // ---------- Emisiones por alcance (doughnut) ----------
   const ctxAlc = document.getElementById("chartAlcance");
-  new Chart(ctxAlc, {
-    type: "doughnut",
-    data: {
-      labels: alcLabels,
-      datasets: [{
-        data: alcValues,
-        borderWidth: 1
-      }]
-    },
-    options: {
-      plugins: { legend: { position: "bottom" } },
-      cutout: "62%"
-    }
-  });
+  if (ctxAlc) {
+    new Chart(ctxAlc, {
+      type: "doughnut",
+      data: {
+        labels: alcLabels,
+        datasets: [{ data: alcValues, borderWidth: 1 }]
+      },
+      options: { plugins: { legend: { position: "bottom" } }, cutout: "62%" }
+    });
+  }
 
   // ---------- Emisiones por país (barras) ----------
   const ctxPais = document.getElementById("chartPaises");
-  new Chart(ctxPais, {
-    type: "bar",
-    data: {
-      labels: paisLabels,
-      datasets: [{
-        label: "tCO₂e",
-        data: paisValues
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { title: { display: true, text: "País" }},
-        y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
+  if (ctxPais) {
+    new Chart(ctxPais, {
+      type: "bar",
+      data: {
+        labels: paisLabels,
+        datasets: [{ label: "tCO₂e", data: paisValues }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: "País" }},
+          y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
+        }
       }
-    }
-  });
+    });
+  }
 });
 </script>
 {% endblock %}
