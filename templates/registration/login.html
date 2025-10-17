@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="brand">
+    <h1><span class="pill">🍃</span> Cencosud Gases Free!</h1>
+    <p>Autenticacion</p>
+  </div>
+  <div class="card">
+    <h3>Ingresar</h3>
+    <small>Usa tus credenciales</small>
+    <form method="post" style="margin-top:12px">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+    {% if next %}<small>Seras redirigido a: {{ next }}</small>{% endif %}
+    <div class="links" style="margin-top:10px">
+      <a href="/accounts/password_reset/">Recuperar contrasena</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,303 @@
+/* ======================================================
+   VARIABLES, RESETS Y TIPOGRAFÍA
+   ====================================================== */
+:root{
+  --verde: #7acaa3;
+  --verde-osc: #63b88f;
+  --azul: #0d2a3e;
+  --azul-2: #123b56;
+
+  --card: #ffffff;
+  --surface: #f5f7fa;
+
+  /* Bordes: mantenemos ambos por compatibilidad con los templates */
+  --border: #e8eef3;
+  --borde:  #e8eef3;
+
+  --texto: #1b2430;
+  --texto-2: #506175;
+
+  --shadow-lg: 0 16px 36px rgba(13,42,62,.12);
+  --shadow-md: 0 10px 20px rgba(0,0,0,.06);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: Inter, system-ui, Segoe UI, Arial, sans-serif;
+  color: var(--texto);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utilidades tipográficas */
+h1, h2, h3, h4 { color: var(--texto); margin: 0 0 .4rem 0; line-height: 1.15; }
+small { color: var(--texto-2); }
+.muted { color: #6b7280; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+/* ======================================================
+   FONDO BASE (GRADIENTE)
+   ====================================================== */
+.bg{
+  background: linear-gradient(90deg, var(--azul) 0%, var(--azul-2) 58%, #f3f7fb 58%);
+  min-height: 100vh;
+}
+@media (max-width: 980px){
+  .bg{
+    background: linear-gradient(180deg, var(--azul) 0%, var(--azul-2) 38%, #f3f7fb 38%);
+  }
+}
+
+/* ======================================================
+   CONTENEDORES Y LAYOUT GENERAL
+   ====================================================== */
+.container{
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.page{
+  max-width: 1300px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 1fr 520px; /* IZQ FLEX / DER FIJO */
+  gap: 40px;
+}
+@media (max-width: 980px){
+  .page{ grid-template-columns: 1fr; gap: 18px; padding: 20px 16px; }
+}
+
+/* Evitar desbordes en grids y flex */
+.page > *, .roles-grid > * { min-width: 0; }
+
+/* ======================================================
+   TARJETAS Y BLOQUES
+   ====================================================== */
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden; /* evita sangrado de decoraciones absolutas */
+}
+.card .big { font-size: 1.6rem; font-weight: 700; }
+.header{
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .5rem 0; border-bottom: 1px solid var(--border);
+}
+.hr { height: 1px; background: var(--border); border: 0; margin: .75rem 0 0; }
+.wrap { display: grid; gap: 1rem; }
+
+/* ======================================================
+   GRID DE ROLES / TILES
+   ====================================================== */
+.roles-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 12px 0 10px;
+}
+.role{
+  position: relative;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .05s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.role:hover{ transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.role h4{ margin: 8px 0 4px; font-size: 16px; color: #1e2a36; word-break: break-word; }
+.role p{ margin:0; color:#6b7b8c; font-size:13px; min-height:32px; word-break: break-word; }
+.role-top{ display:flex; justify-content:space-between; align-items:center; }
+.role .icon{ font-size:22px; }
+.role .check{
+  width:22px;height:22px;border-radius:999px;border:2px solid var(--border);
+  display:grid;place-items:center;font-size:14px;line-height:1;color:transparent;
+  transition:all .15s ease;background:#fff;
+}
+.role.active{ border-color:var(--verde); box-shadow:0 0 0 3px rgba(122,202,163,.25); }
+.role.active .check{ border-color:var(--verde); background:var(--verde); color:#0b4029; }
+.role-selected{
+  display:flex; justify-content:space-between; align-items:center;
+  background:#f6faf8; border:1px dashed var(--verde); border-radius:10px;
+  padding:8px 12px; margin:8px 0 12px;
+}
+
+/* ======================================================
+   BOTONES Y ENLACES
+   ====================================================== */
+.btn{
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--verde); color: #06301b;
+  font-weight: 700; font-size: 15px; cursor: pointer;
+  transition: filter .2s ease, opacity .2s ease, transform .02s ease;
+  opacity: .95; text-decoration: none;
+}
+.btn:hover{ filter: brightness(1.03); opacity: 1; }
+.btn:active{ transform: translateY(1px); }
+.btn:disabled{ opacity: .5; cursor: not-allowed; }
+
+.btn.primary{ background:#0ea5e9; border-color:#0ea5e9; color:#fff; border-radius:12px; }
+.btn.success{ background:#10b981; border-color:#10b981; color:#fff; }
+.btn.danger{ background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn.ghost{ background:#f2f5f8; border:1px solid #dfe7ee; color:#213144; }
+.btn[style*="width:auto"]{ width: auto; } /* compat: botones inline en templates */
+
+.links{ margin-top:10px; text-align:center; }
+.links a{ color:#70879b; text-decoration: underline; font-size:13px; }
+
+/* ======================================================
+   FORMULARIOS
+   ====================================================== */
+input[type="text"], input[type="email"], input[type="search"],
+select, textarea{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--texto);
+  outline: none;
+}
+input:focus, select:focus, textarea:focus{
+  border-color: var(--verde-osc);
+  box-shadow: 0 0 0 3px rgba(122,202,163,.20);
+}
+
+/* ======================================================
+   TABLAS (robustas y responsivas)
+   ====================================================== */
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td {
+  padding: .6rem .5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left; font-size: .95rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+th { font-weight: 700; background: var(--surface); color: var(--texto); }
+tbody tr:hover { background: #fff; }
+
+/* Etiquetas de estado */
+.tag{
+  display: inline-block; padding: .2rem .5rem; border-radius: 999px;
+  font-size: .8rem; border: 1px solid #ddd; background: #fff; color: #334155;
+}
+.tag.ok{ background:#e8fff3; border-color:#b7f0cf; color:#055b35; }
+.tag.warn{ background:#fff9e6; border-color:#f6e7b2; color:#7a5700; }
+.tag.bad{ background:#ffe9e9; border-color:#f7b7b7; color:#7a1b1b; }
+
+/* ======================================================
+   IMÁGENES / SVG / DECORACIONES
+   ====================================================== */
+img, svg { max-width: 100%; height: auto; display: block; }
+.decor{ position: relative; margin-top: 18px; overflow: hidden; }
+.kite{ width:120px; height:120px; opacity:.9; filter: drop-shadow(0 6px 12px rgba(0,0,0,.15)); }
+.waves{ width:420px; height:120px; margin-top:8px; }
+.waves path{ fill:#ffffff; }
+.waves.near{ width: 340px; height: 100px; margin-top: 4px; margin-left: 4px; opacity: .9; }
+.waves.near path{ fill:#ffffff; }
+
+/* Rombo decorativo */
+.diamond{
+  width:110px; height:110px;
+  background: linear-gradient(135deg, var(--verde) 0%, var(--verde-osc) 100%);
+  transform: rotate(45deg);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.15);
+  margin: 6px 0 10px 6px;
+  position: relative;
+}
+.diamond::after{
+  content:""; position:absolute; inset:-6px;
+  border-radius:14px; transform: rotate(0deg);
+  border:2px solid rgba(255,255,255,.25);
+}
+
+/* ======================================================
+   LOGIN CARD (compat con tus vistas)
+   ====================================================== */
+.vcenter{ display:grid; align-content:center; }
+.card.right{ justify-self:end; }
+.login-card{ position: relative; overflow: hidden; }
+.card-header{ margin-bottom: 8px; }
+.card-foot{ margin-top: 10px; color: #7d8ea3; }
+
+/* Burbujas decorativas detrás del card (no invaden) */
+.bubbles::before, .bubbles::after{
+  content:""; position:absolute; z-index:-1; border-radius:999px; filter:blur(8px);
+}
+.bubbles::before{
+  width:140px; height:140px; right:-40px; top:20px;
+  background: radial-gradient(circle at 30% 30%, rgba(122,202,163,.35), rgba(122,202,163,0));
+}
+.bubbles::after{
+  width:220px; height:220px; left:-60px; bottom:-50px;
+  background: radial-gradient(circle at 60% 60%, rgba(18,59,86,.25), rgba(18,59,86,0));
+}
+
+/* ======================================================
+   CHARTS / CANVAS (mantener proporción)
+   ====================================================== */
+.chart-wrap{ position: relative; width: 100%; aspect-ratio: 16/9; }
+.chart-wrap > canvas{ width:100% !important; height:100% !important; display:block; }
+
+/* Compatibilidad con canvas sueltos en templates */
+canvas{ max-width: 100%; height: auto; display: block; }
+
+/* ======================================================
+   MODAL GENÉRICO
+   ====================================================== */
+.modal-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(5,20,30,.45); backdrop-filter: blur(2px);
+  z-index: 50;
+}
+.modal{
+  position: fixed; inset: 0; display: grid; place-items: center; z-index: 51;
+}
+.modal-card{
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  box-shadow: 0 14px 32px rgba(13,42,62,.18);
+  width: min(92vw, 440px); padding: 18px;
+}
+.modal-card h4{ margin: 0 0 6px; }
+.modal-card p{ margin: 0 0 14px; color: var(--texto-2); }
+.modal-actions{ display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ======================================================
+   FIXES ESPECÍFICOS PARA TEMPLATES
+   ====================================================== */
+/* Botones inline dentro de tablas (no ocupar 100%) */
+table .btn{ width: auto; padding: .5rem .75rem; font-size: .9rem; }
+
+/* Inputs en filtros compactos */
+.filters select, .filters input, .filters a.btn, .filters button{
+  padding: .5rem .75rem; border-radius: 10px; border: 1px solid var(--border);
+  background: #fff; color: var(--texto); width: auto;
+}
+
+/* Secciones (espaciado vertical uniforme) */
+.section{ display: grid; gap: .75rem; }
+.section > .head{ display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+
+/* Tablas con scroll horizontal en pantallas pequeñas */
+@media (max-width: 720px){
+  .table-wrap{ overflow-x: auto; }
+  .table-wrap table{ min-width: 720px; }
+}
+
+/* ======================================================
+   ACCESIBILIDAD Y ESTADOS DE INTERACCIÓN
+   ====================================================== */
+a:focus, button:focus, .btn:focus, input:focus, select:focus, textarea:focus{
+  outline: 2px solid rgba(14,165,233,.5);
+  outline-offset: 2px;
+}

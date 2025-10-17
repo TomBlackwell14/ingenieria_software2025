@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}Portal ciudadano · Transparencia Ambiental{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1300px;">
+
+  <!-- ==================== ENCABEZADO ==================== -->
+  <header class="card" style="width:100%;margin-bottom:20px;">
+    <h2 style="margin:0;">Portal Ciudadano de Sostenibilidad</h2>
+    <small>Consulta pública de indicadores, metas e iniciativas ambientales de la empresa.</small>
+
+    <form action="#" method="get" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <input type="search" name="q" placeholder="Buscar noticias, metas o iniciativas..."
+             style="flex:1;min-width:280px;padding:10px;border:1px solid var(--borde);border-radius:10px;">
+      <button class="btn" type="submit" style="width:auto;">🔍 Buscar</button>
+    </form>
+  </header>
+
+  <!-- ==================== RF-01: INDICADORES PRINCIPALES ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Indicadores de huella de carbono</h3>
+    <small>Visualiza el progreso hacia la carbono neutralidad.</small>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px;">
+      <div class="card" style="text-align:center;">
+        <small>Emisiones totales actuales</small>
+        <div style="font-size:28px;font-weight:700;">{{ kpi_emisiones_tco2e|default:0|floatformat:1 }} tCO₂e</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <small>Reducción lograda</small>
+        <div style="font-size:28px;font-weight:700;">{{ reduccion_pct|default:0|floatformat:1 }}%</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <small>Cumplimiento meta global</small>
+        <div style="font-size:28px;font-weight:700;">{{ cumplimiento_meta_pct|default:0|floatformat:1 }}%</div>
+      </div>
+    </div>
+
+    <!-- Tendencia histórica -->
+    <canvas id="chartHistorico" height="140" style="margin-top:16px;"></canvas>
+
+    <!-- Comparador de fuentes -->
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:16px;align-items:center;">
+      <canvas id="chartFuentes" height="140"></canvas>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="background:#f5f7fa;">
+          <tr><th>Fuente</th><th>tCO₂e</th></tr>
+        </thead>
+        <tbody>
+          {% for f in emisiones_por_fuente %}
+          <tr style="background:#fff;border-bottom:1px solid var(--borde);">
+            <td style="padding:8px;">{{ f.fuente }}</td>
+            <td>{{ f.tco2e|default:0|floatformat:1 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" style="text-align:center;color:#888;">Sin datos disponibles</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== RF-02: METAS Y COMPROMISOS ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Metas y compromisos públicos</h3>
+    <small>Conoce nuestros objetivos estratégicos ambientales y avances por periodo.</small>
+
+    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+      <thead style="background:#f5f7fa;">
+        <tr><th>Año</th><th>Objetivo</th><th>Progreso</th><th>Estado</th></tr>
+      </thead>
+      <tbody>
+        {% for m in metas %}
+        <tr style="background:#fff;border-bottom:1px solid var(--borde);">
+          <td style="padding:8px;">{{ m.anio }}</td>
+          <td>{{ m.objetivo }}</td>
+          <td>
+            <div style="background:#e8eef3;border-radius:6px;height:8px;position:relative;">
+              <span style="background:#7acaa3;width:{{ m.avance }}%;position:absolute;top:0;bottom:0;left:0;border-radius:6px;"></span>
+            </div>
+            <small>{{ m.avance }}%</small>
+          </td>
+          <td>
+            {% if m.avance >= 80 %}
+              <span style="color:#1b7a4a;">En curso</span>
+            {% elif m.avance >= 40 %}
+              <span style="color:#b36b00;">Moderado</span>
+            {% else %}
+              <span style="color:#b32121;">Rezago</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;color:#888;">Sin metas registradas</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="margin-top:12px;">
+      <strong>Compromisos:</strong>
+      <ul style="margin:8px 0;padding-left:20px;">
+        {% for c in compromisos %}
+          <li>{{ c }}</li>
+        {% empty %}
+          <li>Acuerdo de París</li>
+          <li>Objetivos de Desarrollo Sostenible (ODS 13, 15)</li>
+          <li>Política ESG Corporativa 2025</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ==================== RF-03: NOTICIAS ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Noticias y actualizaciones</h3>
+    <small>Últimos comunicados ambientales y de sostenibilidad.</small>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:12px;">
+      {% for n in noticias %}
+      <div class="card" style="padding:14px;">
+        <h4 style="margin:0;">{{ n.titulo }}</h4>
+        <small>{{ n.fecha|date:"Y-m-d" }} · {{ n.categoria }}</small>
+        <p style="margin:8px 0;">{{ n.resumen }}</p>
+        <a href="{{ n.url }}" target="_blank" style="color:var(--azul-2);text-decoration:underline;font-size:13px;">
+          Leer más →
+        </a>
+      </div>
+      {% empty %}
+      <p style="color:#777;">No hay noticias recientes.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ==================== RF-04: INICIATIVAS ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Iniciativas de mitigación</h3>
+    <small>Proyectos activos que contribuyen a reducir nuestra huella.</small>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:12px;">
+      {% for i in iniciativas %}
+      <div class="card" style="padding:14px;">
+        <h4 style="margin:0;">{{ i.nombre }}</h4>
+        <small>{{ i.categoria }} · {{ i.ubicacion }}</small>
+        <p style="margin:8px 0;">{{ i.descripcion|truncatewords:20 }}</p>
+        <div style="margin:6px 0;">
+          <small>Avance:</small>
+          <div style="background:#e8eef3;border-radius:6px;height:8px;position:relative;">
+            <span style="background:#7acaa3;width:{{ i.avance }}%;position:absolute;top:0;bottom:0;left:0;border-radius:6px;"></span>
+          </div>
+          <small>{{ i.avance|floatformat:0 }}% · Impacto: {{ i.reduccion_esperada|default:0|floatformat:1 }} tCO₂e evitadas</small>
+        </div>
+        {% if i.imagen %}
+        <img src="{{ i.imagen.url }}" alt="{{ i.nombre }}" style="width:100%;border-radius:10px;margin-top:8px;">
+        {% endif %}
+      </div>
+      {% empty %}
+      <p style="color:#777;">Sin iniciativas registradas.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ==================== RF-05: IMPACTO POSITIVO ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Indicadores de impacto positivo</h3>
+    <small>Resultados derivados de políticas y proyectos ambientales.</small>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:12px;">
+      <div class="card" style="text-align:center;">
+        <small>Energía renovable utilizada</small>
+        <div style="font-size:26px;font-weight:700;">{{ energia_renovable_pct|default:0|floatformat:1 }}%</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <small>Emisiones compensadas</small>
+        <div style="font-size:26px;font-weight:700;">{{ tco2e_compensadas|default:0|floatformat:1 }} tCO₂e</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <small>Comunidades beneficiadas</small>
+        <div style="font-size:26px;font-weight:700;">{{ comunidades_beneficiadas|default:0 }}</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <small>Árboles plantados</small>
+        <div style="font-size:26px;font-weight:700;">{{ arboles_plantados|default:0 }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== RF-06: REPORTES PÚBLICOS ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Reportes públicos</h3>
+    <small>Descarga de documentos de sostenibilidad y emisiones.</small>
+
+    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+      <thead style="background:#f5f7fa;">
+        <tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Descargar</th></tr>
+      </thead>
+      <tbody>
+        {% for r in reportes_publicos %}
+        <tr style="background:#fff;border-bottom:1px solid var(--borde);">
+          <td style="padding:8px;">{{ r.nombre }}</td>
+          <td>{{ r.tipo }}</td>
+          <td>{{ r.fecha|date:"Y-m-d" }}</td>
+          <td>
+            {% if r.archivo %}
+              <a class="btn" href="{{ r.archivo.url }}" download style="width:auto;">📄 Descargar</a>
+            {% else %}
+              <span class="muted">Sin archivo</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;color:#888;">No hay reportes disponibles</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ==================== RF-07: CONTACTO ==================== -->
+  <section class="card" style="margin-bottom:24px;">
+    <h3>Contacto y participación ciudadana</h3>
+    <small>Envía tus consultas, reclamos o sugerencias ambientales.</small>
+
+    <form action="#" method="post" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+      {% csrf_token %}
+      <input type="text" name="nombre" placeholder="Tu nombre" required
+             style="padding:8px;border:1px solid var(--borde);border-radius:10px;">
+      <input type="email" name="correo" placeholder="Tu correo" required
+             style="padding:8px;border:1px solid var(--borde);border-radius:10px;">
+      <select name="motivo" style="grid-column:1/-1;padding:8px;border:1px solid var(--borde);border-radius:10px;">
+        <option value="">Seleccionar motivo</option>
+        <option>Consulta</option>
+        <option>Reclamo</option>
+        <option>Sugerencia</option>
+      </select>
+      <textarea name="mensaje" rows="4" placeholder="Escribe tu mensaje..."
+                style="grid-column:1/-1;padding:8px;border:1px solid var(--borde);border-radius:10px;"></textarea>
+      <button class="btn" type="submit" style="grid-column:1/-1;width:fit-content;">Enviar mensaje</button>
+    </form>
+    <small style="opacity:.8;">Tu mensaje será derivado automáticamente al equipo de sostenibilidad.</small>
+  </section>
+
+</div>
+
+<!-- ==================== GRÁFICOS ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Gráfico histórico de emisiones
+  const ctxHist = document.getElementById("chartHistorico");
+  const histLabels = {{ series_historico_labels|default:"['2019','2020','2021','2022','2023']"|safe }};
+  const histValues = {{ series_historico_emisiones|default:"[220,210,190,175,160]"|safe }};
+  new Chart(ctxHist, {
+    type: "line",
+    data: {
+      labels: histLabels,
+      datasets: [{
+        label: "Emisiones (tCO₂e)",
+        data: histValues,
+        borderColor: "#1b7a4a",
+        backgroundColor: "rgba(122,202,163,0.25)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+  });
+
+  // Gráfico comparativo por fuente
+  const ctxF = document.getElementById("chartFuentes");
+  const fuenteLabels = {{ fuentes_labels|default:"['Energía','Transporte','Residuos']"|safe }};
+  const fuenteValues = {{ fuentes_values|default:"[60,30,10]"|safe }};
+  new Chart(ctxF, {
+    type: "bar",
+    data: {
+      labels: fuenteLabels,
+      datasets: [{
+        data: fuenteValues,
+        backgroundColor: ["#7acaa3","#63b88f","#0d2a3e"]
+      }]
+    },
+    options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+  });
+});
+</script>
+{% endblock %}
