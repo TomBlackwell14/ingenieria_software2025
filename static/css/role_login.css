@@ -1,0 +1,206 @@
+/* =========================================
+   ROLE_LOGIN.CSS
+   ESTILOS VISUALES: COLORES, TIPOGRAFIA, LAYOUT
+   ========================================= */
+
+/* FUENTES GOOGLE */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap');
+
+/* VARIABLES DE COLOR (EDITABLES) */
+:root{
+  --brand-blue: #0E6DFD;   /* AZUL PRINCIPAL */
+  --brand-blue-700: #0A54C7;
+  --brand-accent: #22c55e; /* ACCENTO OPCIONAL VERDE */
+  --text-dark: #0f172a;    /* TEXTO OSCURO */
+  --text-light: #ffffff;   /* TEXTO CLARO */
+  --card-bg: #ffffff;      /* FONDO TARJETAS (DERECHA) */
+  --border: rgba(2,6,23,0.06);
+  --shadow: 0 8px 24px rgba(2,6,23,0.08);
+}
+
+/* BASE TIPOGRAFIA */
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--text-dark);
+}
+
+/* FONDO AZUL/BLANCO CON DIAGONAL SUAVE */
+.bg{
+  background:
+    linear-gradient(135deg, var(--brand-blue) 0 52%, #ffffff 52% 100%);
+  min-height: 100dvh;
+}
+
+/* CONTENEDOR PRINCIPAL: DOS COLUMNAS */
+.page{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* UTILIDADES */
+.vcenter{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* TARJETA IZQUIERDA (BRAND) SOBRE FONDO AZUL */
+.brand{
+  color: var(--text-light);       /* TEXTO CLARO */
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+/* DECORACION SUTIL INTERNA */
+.brand::after{
+  content:"";
+  position:absolute; inset:-1px;
+  background:
+    radial-gradient(600px 220px at -10% 10%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(420px 180px at 115% 95%, rgba(255,255,255,.06), transparent 60%);
+  pointer-events:none;
+}
+
+/* CABECERA IZQUIERDA: TITULO + ICONO */
+.brand-head{
+  display: flex; align-items: center; gap: .75rem;
+  margin-bottom: .5rem;
+}
+.brand-pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  width: 46px; height: 46px; border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(2px);
+  font-size: 1.25rem;
+}
+.brand h1{
+  margin:0;
+  font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: .2px;
+  line-height: 1.05;
+}
+
+/* SUBTITULO IZQUIERDA */
+.brand-sub{
+  opacity: .95;
+  margin: .2rem 0 1.2rem;
+}
+
+/* OLAS SVG: COLORES AUTOMATICOS SOBRE AZUL */
+.brand .waves{ max-width: 540px; margin-top: .4rem }
+.brand .waves path:first-child{ fill: rgba(255,255,255,0.16); }
+.brand .waves path:last-child{  fill: rgba(255,255,255,0.10); }
+
+/* BENEFICIOS (LISTA) CON TIPOGRAFIA MODERNA */
+.benefits{
+  display:grid; gap:.65rem; margin: 1rem 0 1.25rem;
+}
+.benefit{
+  display:flex; gap:.6rem; align-items:flex-start;
+  padding:.55rem .8rem; border-radius: 12px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  line-height: 1.25;
+}
+.benefit .b-ico{ font-size: 1.05rem; transform: translateY(2px); }
+.benefit h4{
+  margin: 0 0 .15rem 0;
+  font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 600;
+}
+.benefit p{
+  margin:0; opacity:.95;
+}
+
+/* MINI STATS */
+.mini-stats{
+  display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:.8rem;
+}
+.mini-card{
+  padding: .9rem .95rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.16);
+}
+.mini-card small{ display:block; opacity:.95; margin-bottom:.18rem }
+.mini-card strong{
+  font-size: 1.15rem; letter-spacing: .2px; font-weight: 700;
+}
+
+/* TARJETA DERECHA (LOGIN) SOBRE FONDO BLANCO */
+.login-card{
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  box-shadow: var(--shadow);
+  color: var(--text-dark);
+}
+.card-header h3{ margin:0 0 .25rem 0; font-weight:700 }
+.card-header small{ opacity:.8 }
+
+/* GRILLA DE ROLES (SIN CAMBIO DE ESTILO BASE) */
+.roles-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:.75rem;
+  margin: 1rem 0 1.25rem;
+}
+.role{
+  text-align:left;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:.85rem .95rem;
+  background:#fff;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.role:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  border-color: rgba(2,6,23,0.12);
+}
+.role.active{
+  outline: 2px solid var(--brand-blue);
+  box-shadow: 0 0 0 6px rgba(14,109,253,0.12);
+}
+.role .role-top{ display:flex; align-items:center; justify-content:flex-start; gap:.5rem; }
+.role .check{ display:none } /* OCULTA EL CHECK SI NO LO NECESITAS */
+.role h4{ margin:.35rem 0 .1rem 0; font-weight:600 }
+.role p{ margin:0; opacity:.8; font-size:.925rem }
+
+/* BOTON CONTINUAR */
+.btn.primary{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.8rem 1rem; border-radius:12px;
+  background: var(--brand-blue);
+  color:#fff; border: none; font-weight: 600;
+  transition: filter .12s ease, transform .06s ease;
+}
+.btn.primary:disabled{ opacity:.5; cursor:not-allowed }
+.btn.primary:not(:disabled):hover{ filter: brightness(1.02) }
+.btn.primary:active{ transform: translateY(1px) }
+
+/* LINKS AUXILIARES */
+.links{ margin-top:.75rem }
+.links a{ color: var(--brand-blue-700); text-decoration:none }
+.links a:hover{ text-decoration: underline }
+
+/* RESPONSIVE */
+@media (max-width: 980px){
+  .page{ grid-template-columns: 1fr; }
+  .bg{
+    background:
+      linear-gradient(180deg, var(--brand-blue) 0 42%, #ffffff 42% 100%);
+  }
+  .roles-grid{ grid-template-columns: 1fr; }
+}

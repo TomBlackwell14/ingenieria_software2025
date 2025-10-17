@@ -1,0 +1,265 @@
+/* ================================
+   CIUDADANO.CSS — Look & feel corporativo
+   - Azul/Blanco diagonal como el login
+   - Tipografías modernas (Poppins/Inter)
+   - Tarjetas, tablas, inputs y botones
+   - Overrides suaves a inline styles
+   ================================ */
+
+/* FUENTES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap');
+
+/* PALETA */
+:root{
+  --brand-blue: #0E6DFD;
+  --brand-blue-700: #0A54C7;
+  --brand-accent: #22c55e;
+  --text-dark: #0f172a;
+  --text-light: #ffffff;
+  --card-bg: #ffffff;
+  --border: rgba(2,6,23,0.08);
+  --shadow: 0 8px 24px rgba(2,6,23,0.08);
+
+  /* Compat con tu HTML actual */
+  --borde: rgba(2,6,23,0.12);
+  --azul-2: #0A54C7;
+}
+
+/* FONDO diagonal igual al login */
+.bg{
+  background:
+    linear-gradient(135deg, var(--brand-blue) 0 52%, #ffffff 52% 100%);
+  min-height: 100dvh;
+}
+
+/* TIPOGRAFIA BASE */
+html, body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--text-dark);
+}
+
+/* CONTENEDOR */
+.container{
+  margin: 0 auto !important;
+  padding: clamp(1rem, 3vw, 2rem) !important;
+}
+
+/* TITULOS */
+h1, h2, h3, h4{
+  font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  letter-spacing: .2px;
+}
+h2{ font-weight: 700; }
+h3{ font-weight: 700; }
+h4{ font-weight: 600; }
+
+/* TARJETAS GLOBALES */
+.card{
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow) !important;
+  padding: clamp(1rem, 2.2vw, 1.5rem) !important;
+}
+
+/* ENCABEZADO PRINCIPAL (mejora visual sin tocar HTML) */
+.container > header.card {
+  color: var(--text-dark);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.9) 0, #fff 30%),
+    radial-gradient(420px 180px at 110% -30%, rgba(14,109,253,0.08), transparent 60%),
+    radial-gradient(420px 180px at -10% 130%, rgba(14,109,253,0.06), transparent 60%);
+  border: 1px solid rgba(2,6,23,0.06) !important;
+}
+
+/* BUSCADOR (form del header) */
+.container > header.card form{
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.container > header.card input[type="search"]{
+  border:1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: .75rem .9rem !important;
+  outline: none;
+  min-width: 280px;
+  background: #fff;
+}
+.container > header.card input[type="search"]:focus{
+  border-color: var(--brand-blue) !important;
+}
+
+/* BOTONES */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem;
+  padding:.7rem 1rem;
+  border-radius:12px;
+  font-weight:600;
+  border:1px solid transparent;
+  background: var(--brand-blue);
+  color:#fff !important;
+  text-decoration:none;
+  transition: filter .12s ease, transform .06s ease;
+}
+.btn:hover{ filter: brightness(1.03); }
+.btn:active{ transform: translateY(1px); }
+.muted{ opacity:.7; }
+
+/* GRID DE KPIs */
+section.card:nth-of-type(1) > div[style*="grid-template-columns"] > .card{
+  text-align:center !important;
+}
+section.card:nth-of-type(1) > div[style*="grid-template-columns"] small{
+  display:block; opacity:.75;
+}
+section.card:nth-of-type(1) > div[style*="grid-template-columns"] div[style*="font-size"]{
+  /* reforzar jerarquía visual */
+  font-size: 28px !important;
+  font-weight: 700 !important;
+}
+
+/* CHARTS (canvas) */
+canvas{
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+/* LAYOUT CHART + TABLA comparativa */
+section.card:nth-of-type(1) > div[style*="grid-template-columns:1.2fr 1fr"]{
+  align-items: stretch !important;
+}
+section.card:nth-of-type(1) > div[style*="grid-template-columns:1.2fr 1fr"] canvas{
+  height: 220px !important;
+}
+
+/* TABLAS GENERALES */
+table{
+  width: 100%;
+  border-collapse: collapse !important;
+  background: #fff;
+}
+thead{
+  background: #f5f7fa !important;
+}
+th, td{
+  text-align: left;
+  padding: 10px 12px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+tbody tr:hover{
+  background: #fafbff;
+}
+
+/* BADGES DE ESTADO DENTRO DE TABLAS (colores consistentes) */
+td span[style*="color:#1b7a4a"]{ color: #1b7a4a !important; font-weight:600; }  /* En curso */
+td span[style*="color:#b36b00"]{ color: #b36b00 !important; font-weight:600; }  /* Moderado */
+td span[style*="color:#b32121"]{ color: #b32121 !important; font-weight:600; }  /* Rezago */
+
+/* PROGRESOS (barras simples que ya tienes) */
+div[style*="height:8px"][style*="position:relative"]{
+  background: #e8eef3 !important;
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+div[style*="height:8px"][style*="position:relative"] > span{
+  background: var(--brand-accent) !important;
+  border-radius: 999px !important;
+}
+
+/* LISTADO DE NOTICIAS (cards dentro de grid) */
+section.card:nth-of-type(3) .card{
+  border-radius:14px !important;
+}
+section.card:nth-of-type(3) .card h4{
+  margin:0 0 2px 0;
+  font-weight: 700;
+}
+section.card:nth-of-type(3) .card small{
+  opacity:.8;
+}
+section.card:nth-of-type(3) .card a{
+  color: var(--brand-blue-700) !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+section.card:nth-of-type(3) .card a:hover{
+  text-decoration: underline !important;
+}
+
+/* INICIATIVAS (cards del grid) */
+section.card:nth-of-type(4) .card{
+  border-radius:14px !important;
+}
+section.card:nth-of-type(4) .card h4{
+  margin:0 0 4px 0;
+  font-weight: 700;
+}
+section.card:nth-of-type(4) .card small{
+  opacity:.8;
+}
+section.card:nth-of-type(4) .card img{
+  border-radius: 12px !important;
+}
+
+/* BLOQUE INDICADORES POSITIVOS (cards pequeñas) */
+section.card:nth-of-type(5) > div[style*="grid-template-columns"] > .card{
+  text-align: center !important;
+}
+section.card:nth-of-type(5) > div[style*="grid-template-columns"] small{
+  display:block; opacity:.75;
+}
+section.card:nth-of-type(5) > div[style*="grid-template-columns"] div[style*="font-size"]{
+  font-size: 26px !important;
+  font-weight: 700 !important;
+}
+
+/* LINK DESCARGA REPORTES */
+a.btn[download]{
+  background: #f8fafc;
+  color: var(--brand-blue-700) !important;
+  border: 1px solid var(--brand-blue-700);
+}
+a.btn[download]:hover{
+  background: #eef4ff;
+}
+
+/* FORMULARIO CONTACTO */
+section.card:nth-of-type(7) form{
+  gap: 12px !important;
+}
+section.card:nth-of-type(7) input[type="text"],
+section.card:nth-of-type(7) input[type="email"],
+section.card:nth-of-type(7) select,
+section.card:nth-of-type(7) textarea{
+  border:1px solid var(--border) !important;
+  border-radius:12px !important;
+  padding:.7rem .9rem !important;
+  outline:none;
+  background:#fff;
+}
+section.card:nth-of-type(7) input:focus,
+section.card:nth-of-type(7) select:focus,
+section.card:nth-of-type(7) textarea:focus{
+  border-color: var(--brand-blue) !important;
+}
+
+/* ENLACES GENERALES */
+a{ color: var(--brand-blue-700); }
+a:hover{ text-decoration: underline; }
+
+/* RESPONSIVE */
+@media (max-width: 1100px){
+  /* KPIs y Goals ya usan auto-fit, solo ajustar paddings si hace falta */
+}
+@media (max-width: 780px){
+  .container{
+    padding: 1rem !important;
+  }
+  .bg{
+    background:
+      linear-gradient(180deg, var(--brand-blue) 0 42%, #ffffff 42% 100%);
+  }
+  /* En grids definidos inline tu HTML ya hace auto-fit,
+     así que no forzamos columnas aquí para no pelear con inline */
+}

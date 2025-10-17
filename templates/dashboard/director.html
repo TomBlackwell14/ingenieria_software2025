@@ -1,409 +1,476 @@
 {% extends "base.html" %}
 {% block title %}Dashboard Director · Desempeño ambiental{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container" style="max-width:1300px;">
+<div class="container-fluid dashboard-director">
 
-  <!-- ENCABEZADO -->
-  <header class="card" style="width:100%;margin-bottom:20px;">
-    <h2 style="margin:0;">Desempeño Ambiental Corporativo (Vista Pública)</h2>
-    <small>Transparencia: avance hacia la carbono neutralidad, iniciativas y reportes institucionales.</small>
-  </header>
+    <header class="header-card">
+        <h2>Desempeño Ambiental Corporativo <span class="badge public-view-badge">Vista Pública</span></h2>
+        <small class="subtitle">Transparencia: avance hacia la carbono neutralidad, iniciativas y reportes institucionales.</small>
+    </header>
 
-  <!-- =================== 1) PROGRESO HACIA LA META (HU-09) =================== -->
-  <!-- KPIs -->
-  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:16px;">
-    <div class="card" style="text-align:center;">
-      <small>Emisiones actuales</small>
-      <div style="font-size:28px;font-weight:700;">
-        {{ kpi_emisiones_tco2e|default:0|floatformat:1 }} <span style="font-size:14px;">tCO₂e</span>
-      </div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <small>Línea base</small>
-      <div style="font-size:28px;font-weight:700;">
-        {{ base_year|default:"2019" }}
-      </div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <small>Meta de CN</small>
-      <div style="font-size:28px;font-weight:700;">
-        {{ target_year|default:"2030" }}
-        <div style="font-size:12px;opacity:.8;">Objetivo: {{ target_value_tco2e|default:0|floatformat:1 }} tCO₂e</div>
-      </div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <small>Cumplimiento vs meta</small>
-      <div style="font-size:28px;font-weight:700;">
-        {{ kpi_cumplimiento_pct|default:0|floatformat:1 }}%
-      </div>
-    </div>
-  </section>
+    <section class="section-kpis">
+        <h3 class="section-title">Progreso Hacia la Carbono Neutralidad</h3>
+        <hr class="section-divider">
 
-  <!-- Alerta de desviación -->
-  {% with desv=desviacion_pct|default:0 umbral=umbral_alerta|default:10 %}
-  <section class="card" style="margin-bottom:16px;{% if desv > umbral %}border-color:#ffd2d2;background:#fff5f5{% endif %}">
-    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
-      <div>
-        <strong>Desviación actual:</strong>
-        <span style="color:{% if desv > umbral %}#b32121{% else %}#1b7a4a{% endif %};font-weight:700;">
-          {{ desv|floatformat:1 }}%
-        </span>
-        <small style="margin-left:6px;opacity:.8;">(Umbral: {{ umbral }}%)</small>
-      </div>
-      {% if desv > umbral %}
-        <div class="btn" style="width:auto;background:#ffe8e8;color:#6a1b1b;">🔔 Alerta: sobre la proyección anual</div>
-      {% else %}
-        <div class="btn" style="width:auto;">✅ En rango esperado</div>
-      {% endif %}
-    </div>
-  </section>
-  {% endwith %}
-
-  <!-- Gráfico histórico: emisiones vs meta -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin-top:0;">Evolución de emisiones vs meta</h3>
-    <small>Serie histórica de tCO₂e comparada con la proyección hacia la carbono neutralidad.</small>
-    <canvas id="chartHistorico" height="140" style="margin-top:14px;"></canvas>
-
-    <!-- Indicadores adicionales -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:16px;">
-      <div class="card" style="text-align:center;">
-        <small>Reducción lograda</small>
-        <div style="font-size:24px;font-weight:700;">
-          {{ reduccion_lograda_tco2e|default:0|floatformat:1 }} tCO₂e
-        </div>
-      </div>
-      <div class="card" style="text-align:center;">
-        <small>Tasa anual de disminución</small>
-        <div style="font-size:24px;font-weight:700;">
-          {{ tasa_anual_disminucion_pct|default:0|floatformat:1 }}%
-        </div>
-      </div>
-      <div class="card" style="text-align:center;">
-        <small>Desviación vs proyección</small>
-        <div style="font-size:24px;font-weight:700;">
-          {{ desviacion_pct|default:0|floatformat:1 }}%
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Emisiones por alcance -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Distribución de emisiones por alcance</h3>
-    <small>Alcance 1 (directas), 2 (energía), 3 (otras indirectas).</small>
-    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:12px;align-items:center;">
-      <canvas id="chartAlcance" height="140"></canvas>
-      <table style="width:100%;border-collapse:collapse;">
-        <thead style="background:#f5f7fa;">
-          <tr><th>Alcance</th><th>tCO₂e</th></tr>
-        </thead>
-        <tbody>
-          {% for a in emisiones_por_alcance %}
-          <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-            <td style="padding:8px;">{{ a.alcance }}</td>
-            <td><b>{{ a.t|default:0|floatformat:1 }}</b></td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="2" style="text-align:center;color:#888;">Sin datos</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =================== 2) REPORTES INSTITUCIONALES (HU-13) =================== -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Reportes institucionales</h3>
-    <small>Generación y control de versiones de informes PDF oficiales.</small>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-      <button class="btn" {% if not can_generate_pdf %}disabled{% endif %} style="width:auto;">
-        🧾 Generar reporte PDF
-      </button>
-      <button class="btn" style="width:auto;background:#edf6ff;color:#0c3a67;">
-        📧 Enviar a responsables
-      </button>
-      <div style="flex:1"></div>
-      <small>Metodología: GHG Protocol · Factores de emisión trazables</small>
-    </div>
-
-    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
-      <thead style="background:#f5f7fa;">
-        <tr><th>Fecha</th><th>Versión</th><th>Generado por</th><th>Ruta/Documento</th></tr>
-      </thead>
-      <tbody>
-        {% for r in historial_reportes %}
-        <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-          <td style="padding:8px;">{{ r.fecha_generacion|date:"Y-m-d H:i" }}</td>
-          <td>{{ r.version|default:"1.0" }}</td>
-          <td>{{ r.generado_por.username|default:"—" }}</td>
-          <td>{{ r.ruta_archivo|default:r.archivo.url }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" style="text-align:center;color:#888;">Aún no hay reportes generados</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <small style="opacity:.8;">Solo personal autorizado puede generar/firmar PDFs oficiales.</small>
-  </section>
-
-  <!-- =================== 3) EXPORTACIÓN EXCEL (HU-14) =================== -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Exportación de datos</h3>
-    <small>Descarga de inventario completo para análisis externos (Excel).</small>
-
-    <form action="#" method="get" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-      <!-- PAISES -->
-      <select name="pais" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:160px">
-        <option value="">País: todos</option>
-        {% if paises %}
-          {% for p in paises %}
-            <option>{{ p }}</option>
-          {% endfor %}
-        {% endif %}
-      </select>
-
-      <!-- AÑOS -->
-      <select name="year" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:140px">
-        <option value="">Año: todos</option>
-        {% if years %}
-          {% for y in years %}
-            <option>{{ y }}</option>
-          {% endfor %}
-        {% endif %}
-      </select>
-
-      <select name="alcance" style="padding:8px;border:1px solid var(--borde);border-radius:10px;min-width:160px">
-        <option value="">Alcance: 1, 2, 3</option>
-        <option>1</option><option>2</option><option>3</option>
-      </select>
-
-      <button class="btn" type="submit" style="width:auto;">Filtrar</button>
-      <div style="flex:1"></div>
-      <button class="btn" type="button" style="width:auto;">💾 Exportar Excel</button>
-    </form>
-
-    <small style="opacity:.8;">La descarga registra usuario y fecha para trazabilidad.</small>
-  </section>
-
-  <!-- =================== 4) MONITOREO GLOBAL (CONSOLIDADO) =================== -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Consolidado global</h3>
-    <small>Emisiones por país y cumplimiento normativo general.</small>
-
-    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:12px;align-items:center;">
-      <canvas id="chartPaises" height="140"></canvas>
-
-      <table style="width:100%;border-collapse:collapse;">
-        <thead style="background:#f5f7fa;">
-          <tr><th>País</th><th>tCO₂e</th><th>Cumplimiento</th></tr>
-        </thead>
-        <tbody>
-          {% for c in consolidado_paises %}
-          <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-            <td style="padding:8px;">{{ c.pais }}</td>
-            <td><b>{{ c.tco2e|default:0|floatformat:1 }}</b></td>
-            <td>
-              <span style="color:{% if c.cumplimiento_pct|default:0 > 79 %}#1b7a4a{% else %}#b36b00{% endif %}">
-                {{ c.cumplimiento_pct|default:0|floatformat:0 }}%
-              </span>
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="3" style="text-align:center;color:#888;">Sin datos consolidados</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Comparador de unidades -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Ranking por unidad de negocio</h3>
-    <small>Emisiones, reducción lograda y posición relativa.</small>
-    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
-      <thead style="background:#f5f7fa;">
-        <tr><th>Unidad</th><th>tCO₂e</th><th>% reducción</th><th>Ranking</th></tr>
-      </thead>
-      <tbody>
-        {% for u in ranking_unidades %}
-        <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-          <td style="padding:8px;">{{ u.unidad }}</td>
-          <td>{{ u.tco2e|default:0|floatformat:1 }}</td>
-          <td>{{ u.reduccion_pct|default:0|floatformat:1 }}%</td>
-          <td>#{{ forloop.counter }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" style="text-align:center;color:#888;">Sin datos para ranking</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <!-- =================== 5) INICIATIVAS (LECTURA) =================== -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Portafolio de iniciativas</h3>
-    <small>Impacto esperado y avance de proyectos de mitigación.</small>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
-      <div style="overflow:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-          <thead style="background:#f5f7fa;">
-            <tr><th>Nombre</th><th>Categoría</th><th>Avance</th><th>Reducción (tCO₂e)</th></tr>
-          </thead>
-          <tbody>
-            {% for i in iniciativas %}
-            <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-              <td style="padding:8px;">{{ i.nombre }}</td>
-              <td>{{ i.categoria }}</td>
-              <td>
-                <div style="background:#e8eef3;border-radius:6px;height:8px;position:relative;">
-                  <span style="background:#7acaa3;width:{{ i.avance }}%;position:absolute;top:0;bottom:0;left:0;border-radius:6px;"></span>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <small class="kpi-label">Emisiones actuales</small>
+                <div class="kpi-value primary-value">
+                    {{ kpi_emisiones_tco2e|default:0|floatformat:1 }} <span class="kpi-unit">tCO₂e</span>
                 </div>
-                <small>{{ i.avance|floatformat:0 }}%</small>
-              </td>
-              <td>{{ i.reduccion_esperada|default:0|floatformat:1 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" style="text-align:center;color:#888;">Sin iniciativas registradas</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </div>
+            <div class="kpi-card">
+                <small class="kpi-label">Línea base</small>
+                <div class="kpi-value secondary-value">
+                    {{ base_year|default:"2019" }}
+                </div>
+            </div>
+            <div class="kpi-card">
+                <small class="kpi-label">Meta de CN</small>
+                <div class="kpi-value secondary-value">
+                    {{ target_year|default:"2030" }}
+                    <div class="kpi-sub-value">Objetivo: {{ target_value_tco2e|default:0|floatformat:1 }} tCO₂e</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <small class="kpi-label">Cumplimiento vs meta</small>
+                <div class="kpi-value tertiary-value">
+                    {{ kpi_cumplimiento_pct|default:0|floatformat:1 }}<span class="kpi-unit">%</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      <div>
-        <div class="card" style="text-align:center;">
-          <small>Costo promedio por tCO₂e evitada</small>
-          <div style="font-size:24px;font-weight:700;">
-            {{ costo_promedio_por_ton|default:0|floatformat:2 }} USD/tCO₂e
-          </div>
+    {% with desv=desviacion_pct|default:0 umbral=umbral_alerta|default:10 %}
+    <section class="alert-section {% if desv > umbral %}alert-danger{% else %}alert-success{% endif %}">
+        <div class="alert-content">
+            <div>
+                <strong class="alert-title">Desviación actual:</strong>
+                <span class="deviation-value {% if desv > umbral %}text-danger{% else %}text-success{% endif %}">
+                    {{ desv|floatformat:1 }}%
+                </span>
+                <small class="alert-threshold">(Umbral: {{ umbral }}%)</small>
+            </div>
+            {% if desv > umbral %}
+                <div class="alert-tag danger-tag">🔔 Alerta: sobre la proyección anual</div>
+            {% else %}
+                <div class="alert-tag success-tag">✅ En rango esperado</div>
+            {% endif %}
         </div>
-        <div class="card" style="text-align:center;">
-          <small>Aporte estimado a la meta</small>
-          <div style="font-size:24px;font-weight:700;">
-            {{ aporte_proyectos_pct|default:0|floatformat:1 }}%
-          </div>
+    </section>
+    {% endwith %}
+
+    <div class="two-column-layout">
+        <div class="col-main">
+            <section class="chart-card">
+                <h3 class="chart-title">Evolución de emisiones vs meta</h3>
+                <small class="chart-subtitle">Serie histórica de tCO₂e comparada con la proyección hacia la carbono neutralidad.</small>
+                <canvas id="chartHistorico" class="main-chart"></canvas>
+
+                <div class="indicator-grid">
+                    <div class="indicator-card">
+                        <small class="indicator-label">Reducción lograda</small>
+                        <div class="indicator-value">
+                            {{ reduccion_lograda_tco2e|default:0|floatformat:1 }} tCO₂e
+                        </div>
+                    </div>
+                    <div class="indicator-card">
+                        <small class="indicator-label">Tasa anual de disminución</small>
+                        <div class="indicator-value">
+                            {{ tasa_anual_disminucion_pct|default:0|floatformat:1 }}%
+                        </div>
+                    </div>
+                    <div class="indicator-card">
+                        <small class="indicator-label">Desviación vs proyección</small>
+                        <div class="indicator-value {% if desviacion_pct|default:0 > umbral_alerta|default:10 %}text-danger{% else %}text-success{% endif %}">
+                            {{ desviacion_pct|default:0|floatformat:1 }}%
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-      </div>
+
+        <div class="col-side">
+            <section class="chart-card chart-alcance-card">
+                <h3 class="chart-title">Distribución de emisiones por alcance</h3>
+                <small class="chart-subtitle">Alcance 1 (directas), 2 (energía), 3 (otras indirectas).</small>
+                <div class="chart-and-table-flex">
+                    <canvas id="chartAlcance" class="chart-alcance"></canvas>
+                    <table class="data-table small-table">
+                        <thead class="table-header-alt">
+                            <tr><th>Alcance</th><th>tCO₂e</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for a in emisiones_por_alcance %}
+                            <tr>
+                                <td class="scope-cell">{{ a.alcance }}</td>
+                                <td class="value-cell"><b>{{ a.t|default:0|floatformat:1 }}</b></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="no-data">Sin datos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </div>
-  </section>
 
-  <!-- =================== 6) CONTROL Y TRAZABILIDAD =================== -->
-  <section class="card" style="margin-bottom:24px;">
-    <h3 style="margin:0;">Trazabilidad</h3>
-    <small>Historial de reportes y validaciones oficiales.</small>
 
-    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
-      <thead style="background:#f5f7fa;">
-        <tr><th>Fecha</th><th>Autor</th><th>Propósito</th><th>Estado</th></tr>
-      </thead>
-      <tbody>
-        {% for h in historial_validaciones %}
-        <tr style="background:#fff;border-bottom:1px solid var(--borde);">
-          <td style="padding:8px;">{{ h.fecha|date:"Y-m-d H:i" }}</td>
-          <td>{{ h.autor }}</td>
-          <td>{{ h.proposito|default:"—" }}</td>
-          <td>{{ h.estado|default:"Validado" }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" style="text-align:center;color:#888;">Sin registros aún</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <small style="opacity:.8;">Esta vista es de solo lectura. La publicación oficial bloquea ediciones posteriores.</small>
-  </section>
+    <section class="data-section">
+        <h3 class="section-title">Reportes institucionales</h3>
+        <small class="section-subtitle">Generación y control de versiones de informes PDF oficiales.</small>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" {% if not can_generate_pdf %}disabled{% endif %}>
+                🧾 Generar reporte PDF
+            </button>
+            <button class="btn btn-secondary">
+                📧 Enviar a responsables
+            </button>
+            <span class="spacer"></span>
+            <small class="metadata">Metodología: **GHG Protocol** · Factores de emisión trazables</small>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table full-width-table">
+                <thead class="table-header">
+                    <tr><th>Fecha</th><th>Versión</th><th>Generado por</th><th>Ruta/Documento</th></tr>
+                </thead>
+                <tbody>
+                    {% for r in historial_reportes %}
+                    <tr>
+                        <td>{{ r.fecha_generacion|date:"Y-m-d H:i" }}</td>
+                        <td>{{ r.version|default:"1.0" }}</td>
+                        <td>{{ r.generado_por.username|default:"—" }}</td>
+                        <td><a href="{{ r.archivo.url }}" target="_blank" class="document-link">{{ r.ruta_archivo|default:"Ver Documento" }}</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="no-data">Aún no hay reportes generados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <small class="footer-note">Solo personal autorizado puede generar/firmar PDFs oficiales.</small>
+    </section>
+
+
+    <section class="data-section">
+        <h3 class="section-title">Exportación de datos</h3>
+        <small class="section-subtitle">Descarga de inventario completo para análisis externos (Excel).</small>
+
+        <form action="#" method="get" class="export-form">
+            <select name="pais" class="form-select">
+                <option value="">País: todos</option>
+                {% if paises %}
+                    {% for p in paises %}
+                        <option>{{ p }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+
+            <select name="year" class="form-select">
+                <option value="">Año: todos</option>
+                {% if years %}
+                    {% for y in years %}
+                        <option>{{ y }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+
+            <select name="alcance" class="form-select">
+                <option value="">Alcance: 1, 2, 3</option>
+                <option>1</option><option>2</option><option>3</option>
+            </select>
+
+            <button class="btn btn-filter" type="submit">Filtrar</button>
+            <span class="spacer"></span>
+            <button class="btn btn-export" type="button">💾 Exportar Excel</button>
+        </form>
+
+        <small class="footer-note">La descarga registra usuario y fecha para trazabilidad.</small>
+    </section>
+
+    <section class="data-section">
+        <h3 class="section-title">Consolidado global</h3>
+        <small class="section-subtitle">Emisiones por país y cumplimiento normativo general.</small>
+
+        <div class="chart-and-table-flex global-consolidated-grid">
+            <div class="chart-box">
+                <canvas id="chartPaises" class="main-chart"></canvas>
+            </div>
+            <div class="table-box">
+                <table class="data-table full-width-table">
+                    <thead class="table-header-alt">
+                        <tr><th>País</th><th>tCO₂e</th><th>Cumplimiento</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in consolidado_paises %}
+                        <tr>
+                            <td class="country-cell">{{ c.pais }}</td>
+                            <td class="value-cell"><b>{{ c.tco2e|default:0|floatformat:1 }}</b></td>
+                            <td class="compliance-cell">
+                                <span class="compliance-badge {% if c.cumplimiento_pct|default:0 > 79 %}badge-success{% else %}badge-warning{% endif %}">
+                                    {{ c.cumplimiento_pct|default:0|floatformat:0 }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="no-data">Sin datos consolidados</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="data-section">
+        <h3 class="section-title">Ranking por unidad de negocio</h3>
+        <small class="section-subtitle">Emisiones, reducción lograda y posición relativa.</small>
+        <div class="table-container">
+            <table class="data-table full-width-table ranking-table">
+                <thead class="table-header">
+                    <tr><th>Unidad</th><th>tCO₂e</th><th>% reducción</th><th>Ranking</th></tr>
+                </thead>
+                <tbody>
+                    {% for u in ranking_unidades %}
+                    <tr>
+                        <td class="unit-cell">{{ u.unidad }}</td>
+                        <td>{{ u.tco2e|default:0|floatformat:1 }}</td>
+                        <td>{{ u.reduccion_pct|default:0|floatformat:1 }}%</td>
+                        <td class="ranking-cell">#{{ forloop.counter }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="no-data">Sin datos para ranking</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <section class="data-section">
+        <h3 class="section-title">Portafolio de iniciativas</h3>
+        <small class="section-subtitle">Impacto esperado y avance de proyectos de mitigación.</small>
+
+        <div class="initiatives-grid">
+            <div class="initiative-table-container">
+                <table class="data-table full-width-table">
+                    <thead class="table-header-alt">
+                        <tr><th>Nombre</th><th>Categoría</th><th>Avance</th><th>Reducción (tCO₂e)</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for i in iniciativas %}
+                        <tr>
+                            <td>{{ i.nombre }}</td>
+                            <td>{{ i.categoria }}</td>
+                            <td class="progress-cell">
+                                <div class="progress-bar-container">
+                                    <span class="progress-bar" style="width:{{ i.avance }}%;"></span>
+                                </div>
+                                <small class="progress-pct">{{ i.avance|floatformat:0 }}%</small>
+                            </td>
+                            <td>{{ i.reduccion_esperada|default:0|floatformat:1 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="no-data">Sin iniciativas registradas</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="initiative-kpis-sidebar">
+                <div class="kpi-card-mini">
+                    <small class="kpi-label">Costo promedio por tCO₂e evitada</small>
+                    <div class="kpi-value primary-value">
+                        {{ costo_promedio_por_ton|default:0|floatformat:2 }} <span class="kpi-unit">USD/tCO₂e</span>
+                    </div>
+                </div>
+                <div class="kpi-card-mini">
+                    <small class="kpi-label">Aporte estimado a la meta</small>
+                    <div class="kpi-value secondary-value">
+                        {{ aporte_proyectos_pct|default:0|floatformat:1 }}<span class="kpi-unit">%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="data-section">
+        <h3 class="section-title">Trazabilidad</h3>
+        <small class="section-subtitle">Historial de reportes y validaciones oficiales.</small>
+
+        <div class="table-container">
+            <table class="data-table full-width-table">
+                <thead class="table-header">
+                    <tr><th>Fecha</th><th>Autor</th><th>Propósito</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    {% for h in historial_validaciones %}
+                    <tr>
+                        <td>{{ h.fecha|date:"Y-m-d H:i" }}</td>
+                        <td>{{ h.autor }}</td>
+                        <td>{{ h.proposito|default:"—" }}</td>
+                        <td>{{ h.estado|default:"Validado" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="no-data">Sin registros aún</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <small class="footer-note">Esta vista es de solo lectura. La publicación oficial bloquea ediciones posteriores.</small>
+    </section>
 
 </div>
 
-<!-- =================== CHARTS =================== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- Datos desde el backend (con defaults seguros) ----------
-  const labelsHistorico = {{ series_historico_labels|default:"[]"|safe }};
-  const dataHistorico = {{ series_historico_emisiones|default:"[]"|safe }};
-  const dataMeta = {{ series_historico_meta|default:"[]"|safe }};
+    // ---------- Datos desde el backend (con defaults seguros) ----------
+    const labelsHistorico = {{ series_historico_labels|default:"[]"|safe }};
+    const dataHistorico = {{ series_historico_emisiones|default:"[]"|safe }};
+    const dataMeta = {{ series_historico_meta|default:"[]"|safe }};
 
-  const alcLabels = {{ emisiones_alcance_labels|default:"['1','2','3']"|safe }};
-  const alcValues = {{ emisiones_alcance_values|default:"[0,0,0]"|safe }};
+    const alcLabels = {{ emisiones_alcance_labels|default:"['1','2','3']"|safe }};
+    const alcValues = {{ emisiones_alcance_values|default:"[0,0,0]"|safe }};
 
-  const paisLabels = {{ consolidado_paises_labels|default:"[]"|safe }};
-  const paisValues = {{ consolidado_paises_tco2e|default:"[]"|safe }};
+    const paisLabels = {{ consolidado_paises_labels|default:"[]"|safe }};
+    const paisValues = {{ consolidado_paises_tco2e|default:"[]"|safe }};
 
-  // ---------- Gráfico histórico (líneas) ----------
-  const ctxHist = document.getElementById("chartHistorico");
-  if (ctxHist) {
-    new Chart(ctxHist, {
-      type: "line",
-      data: {
-        labels: labelsHistorico,
-        datasets: [
-          {
-            label: "Emisiones (tCO₂e)",
-            data: dataHistorico,
-            borderColor: "#1b7a4a",
-            backgroundColor: "rgba(122,202,163,0.25)",
-            fill: true,
-            tension: 0.3,
-            pointRadius: 2
-          },
-          {
-            label: "Meta proyectada",
-            data: dataMeta,
-            borderColor: "#0d2a3e",
-            backgroundColor: "rgba(13,42,62,0.10)",
-            fill: false,
-            borderDash: [6,4],
-            tension: 0.3,
-            pointRadius: 0
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: true } },
-        scales: {
-          x: { title: { display: true, text: "Año" }},
-          y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
-        }
-      }
-    });
-  }
+    const colors = {
+        primary: "#1b7a4a", // Verde oscuro
+        secondary: "#0d2a3e", // Azul oscuro
+        tertiary: "#7acaa3", // Verde claro
+        danger: "#b32121"
+    };
 
-  // ---------- Emisiones por alcance (doughnut) ----------
-  const ctxAlc = document.getElementById("chartAlcance");
-  if (ctxAlc) {
-    new Chart(ctxAlc, {
-      type: "doughnut",
-      data: {
-        labels: alcLabels,
-        datasets: [{ data: alcValues, borderWidth: 1 }]
-      },
-      options: { plugins: { legend: { position: "bottom" } }, cutout: "62%" }
-    });
-  }
+    // ---------- Gráfico histórico (líneas) ----------
+    const ctxHist = document.getElementById("chartHistorico");
+    if (ctxHist) {
+        new Chart(ctxHist, {
+            type: "line",
+            data: {
+                labels: labelsHistorico,
+                datasets: [
+                    {
+                        label: "Emisiones (tCO₂e)",
+                        data: dataHistorico,
+                        borderColor: colors.primary,
+                        backgroundColor: "rgba(27, 122, 74, 0.2)",
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: colors.primary
+                    },
+                    {
+                        label: "Meta proyectada",
+                        data: dataMeta,
+                        borderColor: colors.secondary,
+                        backgroundColor: "transparent",
+                        fill: false,
+                        borderDash: [6, 4],
+                        tension: 0.3,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: {
+                    x: { title: { display: true, text: "Año" }, grid: { display: false } },
+                    y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
+                }
+            }
+        });
+    }
 
-  // ---------- Emisiones por país (barras) ----------
-  const ctxPais = document.getElementById("chartPaises");
-  if (ctxPais) {
-    new Chart(ctxPais, {
-      type: "bar",
-      data: {
-        labels: paisLabels,
-        datasets: [{ label: "tCO₂e", data: paisValues }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { title: { display: true, text: "País" }},
-          y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
-        }
-      }
-    });
-  }
+    // ---------- Emisiones por alcance (doughnut) ----------
+    const ctxAlc = document.getElementById("chartAlcance");
+    if (ctxAlc) {
+        new Chart(ctxAlc, {
+            type: "doughnut",
+            data: {
+                labels: alcLabels,
+                datasets: [{ 
+                    data: alcValues, 
+                    borderWidth: 1, 
+                    backgroundColor: [colors.primary, colors.secondary, colors.tertiary, '#ccc']
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed.toFixed(1) + ' tCO₂e';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }, 
+                cutout: "70%" 
+            }
+        });
+    }
+
+    // ---------- Emisiones por país (barras) ----------
+    const ctxPais = document.getElementById("chartPaises");
+    if (ctxPais) {
+        new Chart(ctxPais, {
+            type: "bar",
+            data: {
+                labels: paisLabels,
+                datasets: [{ 
+                    label: "tCO₂e", 
+                    data: paisValues, 
+                    backgroundColor: colors.primary,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(1) + ' tCO₂e';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: "País" } },
+                    y: { title: { display: true, text: "tCO₂e" }, beginAtZero: true }
+                }
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

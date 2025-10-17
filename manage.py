@@ -6,7 +6,9 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ingenieria_software_2025.settings')
+    # 🛑 LÍNEA CORREGIDA PARA ESTRUCTURA PLANA 🛑
+    # Ahora busca 'settings' en el directorio actual.
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

@@ -5,9 +5,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{% block title %}Cencosud Gases Free!{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/main.css">
+
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+  <!-- 👇 BLOQUE EXTRA PARA ESTILOS ESPECÍFICOS DE CADA PÁGINA -->
+  {% block extra_css %}{% endblock %}
 </head>
 <body class="bg">
   {% block content %}{% endblock %}
+
+  
 </body>
 </html>

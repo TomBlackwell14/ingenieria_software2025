@@ -5,8 +5,8 @@ from . import views  # IMPORTA EL MODULO COMPLETO PARA EVITAR ERRORES AL RENOMBR
 app_name = "dashboard"
 
 urlpatterns = [
-    path("analista/",  views.home_analista,  name="dash_analista"),
-    path("director/",  views.home_director,  name="dash_director"),
-    path("operador/",  views.home_operador,  name="home_operador"),  
-    path("ciudadano/", views.home_ciudadano, name="dash_ciudadano"),
+    path("", views.home_ciudadano, name="home_ciudadano"),   # <- HOME PUBLICO EN /dashboard/ y/o /
+    path("director/", views.home_director, name="home_director"),
+    path("analista/", views.home_analista, name="home_analista"),
+    path("operador/", views.home_operador, name="home_operador"),
 ]
