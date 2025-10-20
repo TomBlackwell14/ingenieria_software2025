@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Login · Cencosud Gases Free{% endblock %}
+{% block page_class %}login-compact{% endblock %}
+
+{% block content %}
+
+<style>
+/* =========================================================
+   LOGIN COMPACTO (CSS AISLADO A ESTA VISTA)
+   ========================================================= */
+.login-compact {
+  --lc-bg: #f5f7fa;
+  --lc-card: #ffffff;
+  --lc-text: #1f2937;
+  --lc-sub: #667085;
+  --lc-border: #e5e7eb;
+  --lc-accent: #009f6b;      /* verde institucional */
+  --lc-accent-2: #00c18a;
+  --lc-error: #c2410c;
+  --lc-shadow: 0 10px 30px rgba(0,0,0,.08);
+  --lc-radius: 16px;
+}
+
+.login-compact .screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: var(--lc-bg);
+}
+
+.login-compact .panel {
+  width: min(440px, 100%);
+  background: var(--lc-card);
+  border: 1px solid var(--lc-border);
+  border-radius: var(--lc-radius);
+  box-shadow: var(--lc-shadow);
+  padding: 1.75rem 1.5rem;
+}
+
+.login-compact .brand {
+  display: flex; align-items: center; gap: .8rem;
+  margin-bottom: .5rem;
+}
+.login-compact .brand .pill {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid var(--lc-accent);
+  color: var(--lc-accent);
+  font-size: 1.4rem;
+}
+.login-compact .brand h1 {
+  font-size: 1.25rem;
+  margin: 0; color: var(--lc-text); font-weight: 800;
+}
+.login-compact .brand-sub {
+  color: var(--lc-sub); margin: 0 0 .75rem 0;
+  font-size: .95rem;
+}
+
+/* encabezado del card */
+.login-compact .card-head h3 {
+  margin: 0 0 .25rem 0; color: var(--lc-text); font-size: 1.25rem;
+}
+.login-compact .card-head small { color: var(--lc-sub); }
+
+/* estiliza form.as_p */
+.login-compact form { margin-top: 1rem; }
+.login-compact form p { margin: 0 0 .9rem 0; }
+.login-compact label { display: block; font-weight: 700; color: var(--lc-text); margin-bottom: .35rem; }
+
+.login-compact input[type="text"],
+.login-compact input[type="email"],
+.login-compact input[type="password"],
+.login-compact input[type="number"],
+.login-compact select,
+.login-compact textarea {
+  width: 100%;
+  padding: .65rem .8rem;
+  border: 1px solid var(--lc-border);
+  border-radius: 10px;
+  outline: none;
+  font-size: .98rem;
+  color: var(--lc-text);
+  background: #000000;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.login-compact input:focus,
+.login-compact select:focus,
+.login-compact textarea:focus {
+  border-color: var(--lc-accent);
+  box-shadow: 0 0 0 3px rgba(0,159,107,.12);
+}
+
+.login-compact .errorlist {
+  list-style: none; margin: .35rem 0 0 0; padding: 0;
+  color: var(--lc-error); font-size: .9rem; font-weight: 700;
+}
+
+/* botón */
+.login-compact .btn-primary {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--lc-accent); color: #fff;
+  border: none; border-radius: 12px;
+  padding: .75rem 1rem; font-weight: 800; font-size: 1rem;
+  cursor: pointer; transition: background .2s ease, transform .06s ease;
+}
+.login-compact .btn-primary:hover { background: var(--lc-accent-2); }
+.login-compact .btn-primary:active { transform: translateY(1px); }
+
+.login-compact .links {
+  margin-top: .85rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: .6rem;
+}
+.login-compact .links a {
+  color: var(--lc-accent); text-decoration: none; font-weight: 700;
+}
+.login-compact .links a:hover { text-decoration: underline; }
+
+/* pie opcional */
+.login-compact .note {
+  margin-top: .75rem; color: var(--lc-sub); font-size: .9rem;
+}
+
+/* reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .login-compact * { transition: none !important; }
+}
+
+/* dark-mode (opcional si tu base aplica) */
+@media (prefers-color-scheme: dark){
+  .login-compact {
+    --lc-bg: #0f172a;
+    --lc-card: #0b1220;
+    --lc-text: #e5e7eb;
+    --lc-sub: #94a3b8;
+    --lc-border: #1e293b;
+    --lc-shadow: 0 10px 30px rgba(0,0,0,.5);
+  }
+  .login-compact .brand .pill { background: transparent; }
+}
+</style>
+
+<div class="screen">
+  <div class="panel" role="dialog" aria-label="Inicio de sesión">
+    <!-- Marca compacta -->
+    <div class="brand">
+      <span class="pill">🍃</span>
+      <h1>Cencosud Gases Free</h1>
+    </div>
+    
+
+    <!-- Encabezado del formulario -->
+    <div class="card-head">
+      <h3>Ingresar</h3>
+      <small>Usa tus credenciales</small>
+    </div>
+
+    <!-- Formulario Django -->
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button class="btn-primary" type="submit">Entrar</button>
+    </form>
+
+    {% if next %}
+      <p class="note">Serás redirigido a: <strong>{{ next }}</strong></p>
+    {% endif %}
+
+    <div class="links">
+      <a href="/accounts/password_reset/">Recuperar contraseña</a>
+      <a href="{% url 'role_login' %}">Volver </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

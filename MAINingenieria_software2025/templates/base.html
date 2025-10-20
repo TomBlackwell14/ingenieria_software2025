@@ -1,0 +1,17 @@
+{# base.html #}
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Cencosud Gases Free{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/cencosud_gasesfree.css' %}">
+  {# CSS por-página opcional #}
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block page_class %}{% endblock %}">
+  {% block content %}{% endblock %}
+</body>
+</html>

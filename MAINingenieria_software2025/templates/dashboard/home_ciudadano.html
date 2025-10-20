@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Cencosud Gases Free · Portal Ciudadano{% endblock %}
+
+{% block content %}
+<!-- =========================================================
+  HOME CIUDADANO - ESTRUCTURA BASE (SIN CSS ADICIONAL)
+  NOTA: COMENTARIOS EN MAYUSCULAS Y SIN TILDES
+  ========================================================= -->
+<div class="gf-page public-home" id="inicio">
+
+  <!-- =========================================================
+  TOPBAR SIMPLE Y PROFESIONAL
+  ========================================================= -->
+  <header class="topbar role-ciudadano">
+  <div class="brand">
+    <div class="brand__logo">
+  <img src="{% static 'img/icono.png' %}" alt="Logo Cencosud Gases Free">
+</div>
+
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--verde)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Transparencia y sostenibilidad</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#compromiso">Compromiso</a>
+    <a href="#noticias">Noticias</a>
+    <a href="#participar">Participar</a>
+    <a href="#datos">Datos</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+
+  <div class="actions">
+    <a href="{% url 'role_login' %}" class="btn">Ingresar</a>
+  </div>
+</header>
+
+
+  <section class="hero">
+  <div class="hero-grid">
+    <!-- IZQUIERDA: TEXTO (dejamos lo que ya tenías) -->
+    <div class="hero-text">
+      <span class="chip chip--soft">Programa de sostenibilidad</span>
+      <h2 class="hero-title">Un futuro mas limpio comienza hoy</h2>
+      <p class="hero-sub">
+        Conoce nuestros avances en reduccion de emisiones, economia circular y colaboracion con comunidades.
+        Te invitamos a ser parte activa del cambio con datos abiertos y metas claras.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn--primary" href="#participar">Comenzar ahora</a>
+        <a class="btn btn--ghost" href="#compromiso">Conocer mas</a>
+      </div>
+    </div>
+
+    <!-- DERECHA: FOTO EOLICA -->
+    <figure class="hero-media" aria-label="Parque eolico representando energia limpia">
+      <img src="{% static 'img/fotoeolica.jpg' %}" alt="Parque eolico representando energia limpia">
+    </figure>
+  </div>
+</section>
+
+  <!-- =========================================================
+       BLOQUE COMPROMISO BREVE (INTRO)
+       ========================================================= -->
+  <section id="compromiso" class="intro">
+    <div class="container">
+      <h3 class="section-title">Nuestro compromiso ambiental</h3>
+      <p class="section-sub">
+        Estamos comprometidos con un futuro sostenible a traves de acciones concretas, mediciones transparentes
+        y trabajo colaborativo con nuestros aliados y comunidades.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       NOTICIAS DESTACADAS
+       ========================================================= -->
+  <section id="noticias" class="cards news" aria-label="Noticias destacadas">
+    <article class="card">
+      <figure class="thumb" role="img" aria-label="Sistema de distribucion de gases limpios"></figure>
+      <div class="card-body">
+        <span class="chip">Innovacion</span>
+        <h4 class="card-title">Nuevo sistema de distribucion de gases limpios</h4>
+        <p class="card-text">Implementamos mejoras que reducen emisiones y elevan la eficiencia energetica.</p>
+        <a class="card-link" href="#">Leer mas</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <figure class="thumb" role="img" aria-label="Reduccion de CO2 verificada"></figure>
+      <div class="card-body">
+        <span class="chip chip--success">Reduccion</span>
+        <h4 class="card-title">45% de reduccion de CO2 en operaciones</h4>
+        <p class="card-text">Resultados verificados por terceros, con mejoras continuas en procesos.</p>
+        <a class="card-link" href="#">Ver informe</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <figure class="thumb" role="img" aria-label="Programa de educacion ambiental"></figure>
+      <div class="card-body">
+        <span class="chip chip--info">Educacion</span>
+        <h4 class="card-title">Programa de educacion ambiental en escuelas</h4>
+        <p class="card-text">Mas de 10.000 estudiantes participan en talleres de reciclaje y energias limpias.</p>
+        <a class="card-link" href="#">Descubrir mas</a>
+      </div>
+    </article>
+  </section>
+
+  <!-- =========================================================
+       COMO PARTICIPAR (4 PASOS)
+       ========================================================= -->
+  <section id="participar" class="howto" aria-labelledby="howto-title">
+    <div class="container">
+      <h3 id="howto-title" class="section-title">Como participar</h3>
+      <p class="section-sub">Unete en 4 pasos simples y comienza a medir tu impacto positivo.</p>
+
+      <div class="howto-grid">
+        <article class="step">
+          <h4 class="step__title">1) Registrate</h4>
+          <p class="step__text">Crea tu cuenta para acceder a paneles y reportes.</p>
+        </article>
+        <article class="step">
+          <h4 class="step__title">2) Completa tu perfil</h4>
+          <p class="step__text">Agrega informacion de contacto e intereses ambientales.</p>
+        </article>
+        <article class="step">
+          <h4 class="step__title">3) Elige un plan</h4>
+          <p class="step__text">Selecciona el plan que mejor se adapte a tus metas.</p>
+        </article>
+        <article class="step">
+          <h4 class="step__title">4) Comienza a impactar</h4>
+          <p class="step__text">Participa en campañas y mide tu huella evitada.</p>
+        </article>
+      </div>
+
+      <div class="howto-cta">
+        <a class="btn btn--primary" href="{% url 'role_login' %}">Comenzar registro</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       METRICAS (KPIS) - BLOQUE SENCILLO
+       ========================================================= -->
+  <section id="metricas" class="metrics" aria-label="Indicadores clave">
+    <div class="metrics-grid">
+      <div class="kpi" role="group" aria-label="Reduccion de CO2">
+        <strong class="kpi__value">45%</strong>
+        <span class="kpi__label">Reduccion de CO2</span>
+      </div>
+      <div class="kpi" role="group" aria-label="Usuarios">
+        <strong class="kpi__value">15.000+</strong>
+        <span class="kpi__label">Usuarios participando</span>
+      </div>
+      <div class="kpi" role="group" aria-label="Compensaciones">
+        <strong class="kpi__value">2.5M</strong>
+        <span class="kpi__label">Toneladas compensadas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FAQ
+       ========================================================= -->
+  <section id="faq" class="faq" aria-labelledby="faq-title">
+    <h3 id="faq-title" class="section-title">Preguntas frecuentes</h3>
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary>¿Que es Cencosud Gases Free?</summary>
+        <p>Iniciativa para medir, reducir y compensar emisiones con estandares reconocidos.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Como puedo unirme?</summary>
+        <p>Registrate y sigue los pasos de la seccion Participar.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Cada cuanto se actualizan los datos?</summary>
+        <p>Actualizacion mensual y reportes consolidados trimestrales.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Que estandares utilizan?</summary>
+        <p>GHG Protocol, ISO 14064 y auditorias externas.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PARTNERS (OPCIONAL)
+       ========================================================= -->
+  <section class="partners" aria-label="Alianzas">
+    <div class="partners-row">
+      <div class="partner-slot" aria-label="Logo aliado 1"></div>
+      <div class="partner-slot" aria-label="Logo aliado 2"></div>
+      <div class="partner-slot" aria-label="Logo aliado 3"></div>
+      <div class="partner-slot" aria-label="Logo aliado 4"></div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       CTA FINAL + SUSCRIPCION
+       ========================================================= -->
+  <section class="cta-final" aria-labelledby="cta-title">
+    <div class="container cta-final__wrap">
+      <div class="cta-final__text">
+        <h3 id="cta-title" class="section-title">Suma tu energia al cambio</h3>
+        <p class="section-sub">Recibe novedades e iniciativas locales en tu correo.</p>
+      </div>
+      <form class="subscribe-form" method="post" action="#">
+        {% csrf_token %}
+        <label class="sr-only" for="email-sub">Correo</label>
+        <input id="email-sub" type="email" name="email" placeholder="tu@email.com" required>
+        <button class="btn btn--primary" type="submit">Suscribirme</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+  <footer class="footer" role="contentinfo">
+    <span>© Cencosud Gases Free</span>
+    <nav aria-label="Enlaces de pie">
+      <a href="#compromiso">Compromisos</a>
+      <a href="#noticias">Noticias</a>
+      <a href="#participar">Participar</a>
+      <a href="#metricas">Datos</a>
+      <a href="#faq">FAQ</a>
+      <a href="{% url 'role_login' %}">Ingresar</a>
+    </nav>
+  </footer>
+
+</div>
+{% endblock %}

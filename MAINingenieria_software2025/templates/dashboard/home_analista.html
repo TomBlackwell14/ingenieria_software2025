@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Analista Ambiental · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<!-- =========================================================
+   HOME ANALISTA AMBIENTAL (CARGA MANUAL ESTILO OPERADOR + HU-06/07/03/04)
+   ========================================================= -->
+
+<header class="topbar role-analista" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Analista Ambiental</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#carga-manual">Carga manual</a>
+    <a href="#importacion">Importar Excel</a>
+    <a href="#inventario">Inventario</a>
+    <a href="#exportar">Exportar</a>
+    <a href="#simulacion">Simulación</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<main class="dashboard-analista container">
+
+  <!-- ===== KPIs RÁPIDOS -->
+  <section id="resumen" class="overview">
+    <div class="card kpi"><h4>Emisiones totales (tCO2e)</h4><strong>{{ kpi_total|default:"12.480" }}</strong></div>
+    <div class="card kpi"><h4>Meta anual cumplida</h4><strong>{{ kpi_meta|default:"82%" }}</strong></div>
+    <div class="card kpi"><h4>Iniciativas activas</h4><strong>{{ kpi_iniciativas|default:"17" }}</strong></div>
+    <div class="card kpi"><h4>Auditorías pendientes</h4><strong>{{ kpi_auditorias|default:"3" }}</strong></div>
+  </section>
+
+  <!-- =========================================================
+       CARGA MANUAL (ESTILO OPERADOR) + PRESET GHG (PREVIEW)
+       ========================================================= -->
+  <section id="carga-manual" class="card card--accent">
+    <header class="section-head">
+      <div class="head-left">
+        <h3>📥 Carga manual de consumos</h3>
+        <small>Preset GHG (preview). El cálculo <b>oficial</b> se confirma en servidor por año/país/fuente.</small>
+      </div>
+      <div class="head-right">
+        <span class="badge">HU-02 · HU-07</span>
+      </div>
+    </header>
+
+    <form class="grid form-grid operador-form" method="post" action="{% url 'dashboard:analista_registro_manual' %}">
+      {% csrf_token %}
+
+      <!-- PASO 1: CONTEXTO -->
+      <div class="fieldset">
+        <div class="fieldset__legend">1) Contexto</div>
+        <div class="fieldset__grid">
+          <div class="form-field">
+            <label for="fecha">Fecha</label>
+            <input id="fecha" name="fecha" type="date" required>
+          </div>
+          <div class="form-field">
+            <label for="pais">País</label>
+            <select id="pais" name="pais" required>
+              <option value="" selected disabled>Seleccione…</option>
+              <option value="CL">Chile</option>
+              <option value="AR">Argentina</option>
+              <option value="BR">Brasil</option>
+              <option value="PE">Perú</option>
+              <option value="CO">Colombia</option>
+              <option value="UY">Uruguay</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="unidad_negocio">Unidad de negocio</label>
+            <select id="unidad_negocio" name="unidad_negocio" required>
+              <option value="" selected disabled>Seleccione…</option>
+              {% for u in unidades_negocio %}
+                <option value="{{ u.id }}">{{ u.nombre }}</option>
+              {% empty %}
+                <option value="default">General</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: FUENTE Y UNIDAD -->
+      <div class="fieldset">
+        <div class="fieldset__legend">2) Fuente y unidad</div>
+        <div class="fieldset__grid">
+          <div class="form-field">
+            <label for="tipo_consumo">Tipo de consumo</label>
+            <select id="tipo_consumo" name="tipo_consumo" required>
+              <option value="" selected disabled>Seleccione…</option>
+              <option value="combustible">Combustible (Alcance 1)</option>
+              <option value="electricidad">Electricidad (Alcance 2)</option>
+              <option value="refrigerantes">Refrigerantes (Alcance 1)</option>
+            </select>
+            <small class="muted">Preset GHG. El valor exacto lo calculará el servidor (HU-07).</small>
+          </div>
+
+          <div class="form-field only-combustible" hidden>
+            <label for="tipo_combustible">Tipo de combustible</label>
+            <select id="tipo_combustible" name="tipo_combustible">
+              <option value="" selected disabled>Seleccione…</option>
+              <option value="diesel">Diésel (EN590)</option>
+              <option value="gasolina">Gasolina</option>
+              <option value="gnl">GNL</option>
+              <option value="glp">GLP</option>
+            </select>
+          </div>
+
+          <div class="form-field only-electricidad" hidden>
+            <label for="factor_region">Factor de red</label>
+            <select id="factor_region" name="factor_region">
+              <option value="" selected disabled>Seleccione…</option>
+              <option value="cl_sic">Chile – SIC/SEN</option>
+              <option value="ar_grid">Argentina – Red</option>
+              <option value="br_grid">Brasil – Red</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="unidad">Unidad</label>
+            <select id="unidad" name="unidad" required>
+              <option value="" selected disabled>Seleccione…</option>
+              <option value="l">Litros (L)</option>
+              <option value="kg">Kilogramos (kg)</option>
+              <option value="m3">Metros cúbicos (m³)</option>
+              <option value="kwh">kWh</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="cantidad">Cantidad</label>
+            <input id="cantidad" name="cantidad" type="number" min="0" step="0.0001" placeholder="0.0000" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3: PREVIEW GHG -->
+      <div class="fieldset">
+        <div class="fieldset__legend">3) Vista previa GHG</div>
+        <div class="fieldset__grid preview-grid">
+          <div class="form-field">
+            <label>Factor de emisión (preview)</label>
+            <input id="factor_preview" type="text" value="-" disabled>
+            <small class="muted">tCO₂e por unidad. El servidor confirmará el factor oficial.</small>
+          </div>
+          <div class="form-field">
+            <label>tCO₂e (preview)</label>
+            <input id="tco2e_preview" type="text" value="-" disabled>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary">Guardar registro</button>
+        <button type="reset" class="btn btn--ghost">Limpiar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- =========================================================
+       HU-06: IMPORTAR EXCEL
+       ========================================================= -->
+  <section id="importacion" class="card">
+    <header class="section-head">
+      <div class="head-left">
+        <h3>📑 Importar archivo Excel</h3>
+        <small>Formato: [fecha, tipo_consumo, unidad, cantidad, país, unidad_negocio, detalle]</small>
+      </div>
+      <div class="head-right"><span class="badge">HU-06</span></div>
+    </header>
+
+    <div class="import-grid">
+      <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:analista_importar_excel' %}">
+        {% csrf_token %}
+        <input type="file" name="archivo" accept=".xlsx,.xls" required>
+        <button type="submit" class="btn btn--primary">Subir e importar</button>
+      </form>
+
+      <div class="template-help">
+        <p><strong>Plantilla de ejemplo:</strong></p>
+        <div class="btn-row">
+          <a class="btn btn--ghost" href="{% url 'dashboard:analista_descargar_plantilla' 'xlsx' %}">Descargar XLSX</a>
+          <a class="btn btn--ghost" href="{% url 'dashboard:analista_descargar_plantilla' 'csv' %}">Descargar CSV</a>
+        </div>
+        <small class="muted">Las filas inválidas se reportarán en un log.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       HU-03: INVENTARIO CONSOLIDADO
+       ========================================================= -->
+  <section id="inventario" class="card">
+    <header class="section-head"><div class="head-left"><h3>📚 Inventario consolidado GEI</h3><small>Filtros por año, alcance, fuente, unidad de negocio</small></div><div class="head-right"><span class="badge">HU-03</span></div></header>
+
+    <form class="filters" method="get" action="{% url 'dashboard:analista_inventario' %}">
+      <div class="filter-row">
+        <select name="anio">
+          <option value="">Año (todos)</option>
+          {% for y in anios %}<option value="{{ y }}" {% if request.GET.anio == y|stringformat:'s' %}selected{% endif %}>{{ y }}</option>{% endfor %}
+        </select>
+        <select name="alcance">
+          <option value="">Alcance (todos)</option>
+          <option value="1" {% if request.GET.alcance == '1' %}selected{% endif %}>Alcance 1</option>
+          <option value="2" {% if request.GET.alcance == '2' %}selected{% endif %}>Alcance 2</option>
+          <option value="3" {% if request.GET.alcance == '3' %}selected{% endif %}>Alcance 3</option>
+        </select>
+        <select name="fuente">
+          <option value="">Fuente (todas)</option>
+          <option value="combustible" {% if request.GET.fuente == 'combustible' %}selected{% endif %}>Combustible</option>
+          <option value="electricidad" {% if request.GET.fuente == 'electricidad' %}selected{% endif %}>Electricidad</option>
+          <option value="refrigerantes" {% if request.GET.fuente == 'refrigerantes' %}selected{% endif %}>Refrigerantes</option>
+        </select>
+        <select name="unidad_negocio">
+          <option value="">Unidad negocio (todas)</option>
+          {% for u in unidades_negocio %}
+            <option value="{{ u.id }}" {% if request.GET.unidad_negocio == u.id|stringformat:'s' %}selected{% endif %}>{{ u.nombre }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn--ghost" type="submit">Aplicar filtros</button>
+      </div>
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Alcance</th><th>Fuente</th><th>Unidad</th><th>Cantidad</th><th>tCO2e</th><th>País</th><th>Unidad negocio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in inventario %}
+          <tr>
+            <td>{{ r.fecha|date:"Y-m-d" }}</td>
+            <td>{{ r.alcance }}</td>
+            <td>{{ r.fuente }}</td>
+            <td>{{ r.unidad }}</td>
+            <td>{{ r.cantidad }}</td>
+            <td><strong>{{ r.tco2e }}</strong></td>
+            <td>{{ r.pais }}</td>
+            <td>{{ r.unidad_negocio__nombre|default:r.unidad_negocio }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="empty">Sin resultados</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a class="btn btn--ghost" href="?{% if request.GET %}{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+      {% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+      <a class="btn btn--ghost" href="?{% if request.GET %}{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- =========================================================
+       HU-04: EXPORTAR
+       ========================================================= -->
+  <section id="exportar" class="card">
+    <header class="section-head"><div class="head-left"><h3>⤵️ Exportar inventario</h3><small>Archivos para auditoría o análisis externo</small></div><div class="head-right"><span class="badge">HU-04</span></div></header>
+    <div class="btn-row">
+      <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'csv' %}?{{ request.GET.urlencode }}">CSV</a>
+      <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'xlsx' %}?{{ request.GET.urlencode }}">XLSX</a>
+      <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'json' %}?{{ request.GET.urlencode }}">JSON</a>
+      <a class="btn btn--primary" href="{% url 'dashboard:analista_bitacora' %}">Ver bitácora</a>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SIMULACIÓN POLÍTICAS PÚBLICAS
+       ========================================================= -->
+  <section id="simulacion" class="card">
+    <header class="section-head">
+      <div class="head-left"><h3>🧪 Simulación de políticas públicas</h3><small>Aplicar límites, impuestos al carbono o metas de reducción</small></div>
+      <div class="head-right"><span class="badge">Escenarios</span></div>
+    </header>
+
+    <form class="grid form-grid" method="post" action="{% url 'dashboard:analista_simulacion' %}">
+      {% csrf_token %}
+      <div class="form-field">
+        <label for="anio_base">Año base</label>
+        <select id="anio_base" name="anio_base" required>
+          {% for y in anios %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="tipo_politica">Tipo de política</label>
+        <select id="tipo_politica" name="tipo_politica" required>
+          <option value="" disabled selected>Seleccione…</option>
+          <option value="limite">Límite de emisiones (tCO2e)</option>
+          <option value="impuesto">Impuesto al carbono (USD/tCO2e)</option>
+          <option value="meta_reduccion">% reducción vs año base</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="valor_politica">Valor</label>
+        <input id="valor_politica" name="valor_politica" type="number" min="0" step="0.01" placeholder="0.00" required>
+      </div>
+      <div class="form-field">
+        <label for="ambito">Ámbito</label>
+        <select id="ambito" name="ambito" required>
+          <option value="total">Total compañía</option>
+          <option value="alcance1">Solo alcance 1</option>
+          <option value="alcance2">Solo alcance 2</option>
+          <option value="alcance3">Solo alcance 3</option>
+          <option value="por_unidad">Por unidad de negocio</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn--primary" type="submit">Simular</button>
+        <a class="btn btn--ghost" href="{% url 'dashboard:analista_simulacion_historial' %}">Ver escenarios previos</a>
+      </div>
+    </form>
+
+    {% if simulacion %}
+    <div class="sim-result">
+      <h4>Resultado (preview)</h4>
+      <ul>
+        <li>Emisiones base: <strong>{{ simulacion.base_tco2e }}</strong> tCO2e</li>
+        <li>Emisiones simuladas: <strong>{{ simulacion.sim_tco2e }}</strong> tCO2e</li>
+        <li>Diferencia: <strong>{{ simulacion.delta_tco2e }}</strong> tCO2e</li>
+        {% if simulacion.costo_est %}<li>Costo estimado: <strong>USD {{ simulacion.costo_est }}</strong></li>{% endif %}
+      </ul>
+    </div>
+    {% endif %}
+  </section>
+
+</main>
+
+<!-- =========================================================
+     ESTILOS LIGEROS (LOOK “OPERADOR”)
+     ========================================================= -->
+<style>
+.dashboard-analista .overview { display:grid; grid-template-columns:repeat(4,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
+.dashboard-analista .kpi strong { font-size:1.4rem; }
+
+.card { border:1px solid #e6e8eb; border-radius:12px; padding:14px; background:#fff; margin-bottom:14px; }
+.card--accent { border-color:#dfeee6; background:linear-gradient(180deg,#f7fbf9,#ffffff); }
+.section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.section-head .badge { background:#eaf7f1; border:1px solid #cfe9dc; padding:2px 8px; border-radius:999px; font-size:.75rem; color:#1b7f52; }
+.fieldset { border:1px solid #e8edf1; border-radius:10px; padding:10px; margin-bottom:10px; background:#fafcfd; }
+.fieldset__legend { font-weight:600; margin-bottom:8px; color:#2c3e50; }
+.fieldset__grid { display:grid; grid-template-columns:repeat(4,minmax(200px,1fr)); gap:10px; }
+.preview-grid { grid-template-columns:repeat(2,minmax(260px,1fr)); }
+.form-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+.form-field { display:flex; flex-direction:column; gap:6px; }
+.form-actions { display:flex; gap:8px; justify-content:flex-end; }
+.table-wrap { overflow:auto; border:1px solid #e5e7eb; border-radius:10px; }
+table { width:100%; border-collapse:collapse; }
+thead th { background:#f8faf9; text-align:left; padding:10px; border-bottom:1px solid #e5e7eb; }
+tbody td { padding:10px; border-bottom:1px solid #eef1f3; }
+.empty { text-align:center; color:#888; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+@media (max-width:1100px){ .fieldset__grid{grid-template-columns:repeat(2,1fr);} .overview{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:680px){ .fieldset__grid,.preview-grid{grid-template-columns:1fr;} }
+</style>
+
+<!-- =========================================================
+     JS PREVIEW GHG (CLIENTE). EL OFICIAL VA EN SERVIDOR (HU-07).
+     ========================================================= -->
+<script>
+const FX = {
+  combustible: {
+    diesel:   { l: 2.68, kg: 3.16, m3: 2.68*1000, base: 2.68 },
+    gasolina: { l: 2.31, kg: 3.00, m3: 2.31*1000, base: 2.31 },
+    gnl:      { kg: 2.75, m3: 1.90, base: 2.75 },
+    glp:      { kg: 3.00, l: 1.50, base: 3.00 }
+  },
+  electricidad: {
+    cl_sic:  { kwh: 0.25/1000, base: 0.25/1000 }, // 0.25 t/MWh
+    ar_grid: { kwh: 0.40/1000, base: 0.40/1000 },
+    br_grid: { kwh: 0.10/1000, base: 0.10/1000 }
+  },
+  refrigerantes: { base: { kg: 1.0 } }
+};
+
+(function(){
+  const tipoConsumo = document.getElementById('tipo_consumo');
+  const tipoComb    = document.getElementById('tipo_combustible');
+  const factorReg   = document.getElementById('factor_region');
+  const unidad      = document.getElementById('unidad');
+  const cantidad    = document.getElementById('cantidad');
+  const fxPrev      = document.getElementById('factor_preview');
+  const tPrev       = document.getElementById('tco2e_preview');
+  const onlyComb    = document.querySelector('.only-combustible');
+  const onlyElec    = document.querySelector('.only-electricidad');
+
+  function toggleCampos(){
+    const v = (tipoConsumo?.value)||'';
+    if (onlyComb) onlyComb.hidden = v!=='combustible';
+    if (onlyElec) onlyElec.hidden = v!=='electricidad';
+  }
+
+  function getFactor(){
+    const u = (unidad?.value||'').toLowerCase();
+    if (!tipoConsumo) return null;
+    const tc = tipoConsumo.value;
+
+    if (tc==='combustible'){
+      const t = (tipoComb?.value)||'diesel';
+      const tbl = FX.combustible[t]||{};
+      return tbl[u] ?? tbl.base ?? null;
+    }
+    if (tc==='electricidad'){
+      const r = (factorReg?.value)||'cl_sic';
+      const tbl = FX.electricidad[r]||{};
+      return tbl[u] ?? tbl.base ?? null;
+    }
+    if (tc==='refrigerantes'){
+      return FX.refrigerantes.base[u] ?? 1.0;
+    }
+    return null;
+  }
+
+  function calc(){
+    const f = getFactor();
+    const v = parseFloat(cantidad?.value||'0')||0;
+    if (f && v>=0){
+      fxPrev.value = f.toFixed(6) + ' tCO2e/' + ((unidad?.value)||'-');
+      tPrev.value  = (v*f).toFixed(6) + ' tCO2e';
+    } else {
+      fxPrev.value = '-';
+      tPrev.value  = '-';
+    }
+  }
+
+  ['change','input'].forEach(evt=>{
+    tipoConsumo?.addEventListener(evt, ()=>{toggleCampos(); calc();});
+    tipoComb?.addEventListener(evt, calc);
+    factorReg?.addEventListener(evt, calc);
+    unidad?.addEventListener(evt, calc);
+    cantidad?.addEventListener(evt, calc);
+  });
+
+  toggleCampos(); calc();
+})();
+</script>
+
+{% endblock %}

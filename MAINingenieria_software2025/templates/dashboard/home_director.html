@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Director · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-director{% endblock %}
+
+{% block content %}
+<!-- =========================================================
+     BARRA SUPERIOR
+     ========================================================= -->
+<header class="topbar role-director" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">🎯</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Director General</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#resumen">Resumen</a>
+    <a href="#indicadores">Indicadores</a>
+    <a href="#reportes">Reportes</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<!-- =========================================================
+     CONTENIDO PANEL DIRECTOR
+     ========================================================= -->
+<main class="dashboard-director" style="padding:clamp(16px,2vw,28px);max-width:1280px;margin:0 auto;display:grid;gap:24px;">
+
+  <!-- =========================================================
+       RESUMEN EJECUTIVO
+       ========================================================= -->
+  <section id="resumen" class="header-card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.25rem;">
+    <h2 style="margin:0 0 .25rem 0;">Resumen Ejecutivo</h2>
+    <p style="margin:0;color:#555">Visión general de las emisiones, metas y desempeño ambiental del grupo.</p>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:.85rem;background:#f3f5f7;border:1px solid var(--borde);border-radius:999px;padding:.25rem .6rem;">
+        Inventario actualizado: {{ kpis.fecha_actualizacion|default:"—" }}
+      </span>
+      <a href="{{ links.metodologia|default:'#' }}" style="font-size:.85rem;background:#f3f5f7;border:1px solid var(--borde);border-radius:999px;padding:.25rem .6rem;text-decoration:none;">
+        Metodología y factores GHG
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       TARJETAS KPI
+       ========================================================= -->
+  <section aria-label="Indicadores clave" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+    {% for kpi in kpis.lista %}
+    <article style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+      <h4 style="color:var(--color-accent);font-size:1.05rem;margin:0 0 .25rem 0;">{{ kpi.titulo }}</h4>
+      <strong style="font-size:1.65rem;">{{ kpi.valor|default:"—" }}</strong>
+      <p style="color:#666;font-size:.92rem;margin:.25rem 0 0 0;">{{ kpi.subtexto|default:"—" }}</p>
+    </article>
+    {% empty %}
+    <article style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+      <h4 style="color:#777;">Sin datos KPI</h4>
+      <p style="color:#999;">Aún no hay métricas cargadas.</p>
+    </article>
+    {% endfor %}
+  </section>
+
+  <!-- =========================================================
+       PROGRESO HACIA LA META
+       ========================================================= -->
+  <section id="indicadores" class="chart-card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+    <h3 style="margin:.2rem 0 0 0;">Progreso hacia la meta</h3>
+    {% with pct=kpis.avance_meta_pct|default:0 %}
+    {% if pct|floatformat != "0" %}
+      <div style="position:relative;height:16px;background:#eef2f3;border-radius:999px;overflow:hidden;margin-top:1rem;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:{{ pct }}%;background:var(--color-accent);"></div>
+      </div>
+      <p style="color:#444;font-size:.9rem;margin-top:.5rem;">Avance: {{ pct }}%</p>
+    {% else %}
+      <div style="padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;margin-top:.5rem;">Sin datos para mostrar</div>
+    {% endif %}
+    {% endwith %}
+  </section>
+
+  <!-- =========================================================
+       TENDENCIA HISTÓRICA
+       ========================================================= -->
+  <section class="chart-card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+    <h3 style="margin:.2rem 0 0 0;">Tendencia de emisiones 2015–2025</h3>
+    {% if tendencia %}
+      <figure style="margin-top:.5rem;height:260px;border-radius:10px;background:linear-gradient(135deg,#eaf7f1,#f4f6f8);display:flex;align-items:center;justify-content:center;color:#777;">
+        <span>📈 Gráfico ({{ tendencia|length }} puntos)</span>
+      </figure>
+    {% else %}
+      <div style="padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;">Sin datos históricos</div>
+    {% endif %}
+  </section>
+
+  <!-- =========================================================
+       TOP FUENTES E INVENTARIO
+       ========================================================= -->
+  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;">
+    <article class="card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+      <header style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="margin:0;">Top fuentes de emisión</h3>
+        <a class="btn btn--ghost" href="{{ links.inventario|default:'#' }}">Inventario</a>
+      </header>
+
+      {% if top_fuentes %}
+        <div class="table-scroll" style="margin-top:.75rem;overflow:auto;max-height:300px;">
+          <table class="table">
+            <thead><tr><th>Unidad</th><th>Fuente</th><th>Alcance</th><th>tCO₂e</th></tr></thead>
+            <tbody>
+              {% for f in top_fuentes %}
+              <tr>
+                <td>{{ f.unidad }}</td><td>{{ f.fuente }}</td><td>{{ f.alcance }}</td><td>{{ f.tco2e }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="margin-top:.75rem;padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;">Sin datos</div>
+      {% endif %}
+    </article>
+
+    <article class="card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+      <h3 style="margin:0 0 .5rem 0;">Reportes y Descargas</h3>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <a class="btn btn--primary" href="{{ links.descargar_pdf|default:'#' }}">Descargar PDF</a>
+        <a class="btn btn--secondary" href="{{ links.descargar_excel|default:'#' }}">Descargar Excel</a>
+      </div>
+    </article>
+  </section>
+
+  <!-- =========================================================
+       ALERTAS
+       ========================================================= -->
+  <section aria-label="Alertas" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
+    <h3 style="margin:.2rem 0 0 0;">Alertas</h3>
+    {% if alertas %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem;margin-top:.75rem;">
+        {% for a in alertas %}
+        <article class="alert" style="border-left:6px solid
+          {% if a.nivel == 'rojo' %}#d14343{% elif a.nivel == 'amarillo' %}#e7b416{% else %}#2e7d32{% endif %};
+          background:#fff;border:1px solid var(--borde);border-radius:10px;padding:.8rem;">
+          <strong>{{ a.titulo }}</strong>
+          <p style="margin:0;color:#555;">{{ a.descripcion }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="margin-top:.5rem;padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;">Sin alertas pendientes</div>
+    {% endif %}
+  </section>
+
+  <footer style="text-align:center;color:#777;">
+    <small>© 2025 Cencosud Gases Free — Dirección Ambiental Global</small>
+  </footer>
+</main>
+{% endblock %}

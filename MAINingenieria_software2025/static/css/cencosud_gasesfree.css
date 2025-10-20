@@ -1,0 +1,480 @@
+/* =========================================================
+   CENCOSUD GASES FREE - CSS UNIFICADO Y MODULAR
+   =========================================================
+   Autor: Nicolás Castillo (USM)
+   Módulos principales:
+   1. VARIABLES Y RESET GLOBAL
+   2. BASE Y ELEMENTOS COMUNES
+   3. BARRA SUPERIOR UNIFICADA (ADAPTABLE SEGÚN ROL)
+   4. HOME DIRECTOR (MANTENIDO)
+   5. HOME ANALISTA (NUEVO)
+   6. HOME OPERARIO (NUEVO)
+   7. HOME CIUDADANO (ACTUALIZADO)
+   ========================================================= */
+
+
+/* =========================================================
+   1. VARIABLES Y RESET GLOBAL
+   ========================================================= */
+:root {
+  --verde: #009f6b;
+  --verde-claro: #00c18a;
+  --gris: #f6f6f6;
+  --borde: #ddd;
+  --texto: #222;
+  --color-primary: var(--verde);
+  --color-border: #e0e0e0;
+  --color-bg: #f4f6f8;
+  --shadow-light: 0 3px 8px rgba(0,0,0,0.05);
+  --shadow-hover: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  color: var(--texto);
+  background: var(--color-bg);
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   2. BASE Y ELEMENTOS COMUNES
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .6rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+  border: 1px solid transparent;
+}
+.btn--primary {
+  background: var(--verde);
+  color: #fff;
+}
+.btn--primary:hover {
+  background: var(--verde-claro);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--verde);
+  border-color: var(--verde);
+}
+.btn--ghost:hover {
+  background: rgba(0,159,107,.08);
+}
+
+
+/* =========================================================
+   3. BARRA SUPERIOR UNIFICADA
+   ========================================================= */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 1rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-light);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Colores por rol */
+.role-director { --color-accent: #009f6b; } /* Verde institucional */
+.role-analista { --color-accent: #007acc; } /* Azul profesional */
+.role-operario { --color-accent: #b37a00; } /* Amarillo dorado */
+.role-ciudadano { --color-accent: #009f6b; } /* Igual que institucional */
+
+/* Estilo interno */
+/* =========================================================
+   NUEVA BARRA SUPERIOR (REDISEÑADA)
+   ========================================================= */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 64px; /* más delgada */
+}
+
+/* === IZQUIERDA: LOGO Y MENSAJE === */
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.topbar .brand__logo {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+}
+
+.topbar .brand__logo img {
+  width: 22px;
+  height: 22px;
+}
+
+.topbar .brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.topbar .brand-text__title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--texto);
+}
+
+.topbar .brand-text__tagline {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* === DERECHA: BOTONES / LINKS === */
+.topbar .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.topbar .nav-links a {
+  text-decoration: none;
+  color: var(--texto);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.topbar .nav-links a:hover {
+  color: var(--verde);
+}
+
+/* === BOTÓN PRINCIPAL === */
+.topbar .actions {
+  display: flex;
+  align-items: center;
+}
+
+.topbar .actions .btn {
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: background 0.25s ease;
+}
+
+.topbar .actions .btn:hover {
+  background: var(--verde-claro);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    height: auto;
+    padding: 1rem;
+  }
+  .topbar .nav-links {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .topbar .actions {
+    align-self: flex-end;
+  }
+}
+
+
+
+/* =========================================================
+   4. HOME DIRECTOR (MANTENIDO)
+   ========================================================= */
+.dashboard-director {
+  max-width: 1300px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.header-card, .chart-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.header-card h2 {
+  color: var(--color-accent);
+  margin-bottom: .5rem;
+}
+.dashboard-director table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dashboard-director th, .dashboard-director td {
+  padding: .75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.dashboard-director th {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   5. HOME ANALISTA (NUEVO DISEÑO)
+   ========================================================= */
+.dashboard-analista {
+  max-width: 1300px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+.dashboard-analista .overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+.dashboard-analista .card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dashboard-analista .card h4 {
+  font-size: 1.1rem;
+  margin-bottom: .3rem;
+  color: var(--color-accent);
+}
+.dashboard-analista .card strong {
+  font-size: 1.5rem;
+  color: var(--texto);
+}
+.dashboard-analista .charts {
+  margin-top: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem;
+}
+.dashboard-analista .charts h3 {
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+}
+.dashboard-analista .table-section {
+  margin-top: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem;
+}
+.dashboard-analista table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dashboard-analista th, .dashboard-analista td {
+  padding: .75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.dashboard-analista th {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   6. HOME OPERARIO (NUEVO DISEÑO)
+   ========================================================= */
+.dashboard-operario {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+.dashboard-operario .tasks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.dashboard-operario .task-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: var(--shadow-light);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.dashboard-operario .task-card h4 {
+  font-size: 1.1rem;
+  color: var(--color-accent);
+}
+.dashboard-operario .task-card p {
+  color: #555;
+  margin: .4rem 0;
+}
+.dashboard-operario .task-card .status {
+  margin-top: .8rem;
+  font-weight: 600;
+}
+.dashboard-operario .status.pending { color: #b36b00; }
+.dashboard-operario .status.completed { color: var(--verde); }
+.dashboard-operario .status.in-progress { color: #007acc; }
+
+.dashboard-operario .task-card .btn {
+  margin-top: 1rem;
+}
+
+
+/* =========================================================
+   7. HOME CIUDADANO (ACTUALIZADO)
+   ========================================================= */
+.public-home {
+  --gf-space-1: .25rem;
+  --gf-space-2: .5rem;
+  --gf-space-3: .75rem;
+  --gf-space-4: 1rem;
+  --gf-space-5: 1.5rem;
+  --gf-space-6: 2rem;
+  --gf-radius-1: 6px;
+  --gf-radius-2: 10px;
+  --gf-radius-3: 14px;
+  --gf-shadow-1: 0 4px 12px rgba(0,0,0,.05);
+}
+
+/* HERO */
+.public-home .hero {
+  padding: var(--gf-space-6);
+  background: var(--color-bg);
+}
+.public-home .hero-title {
+  color: var(--color-primary);
+  font-size: 2rem;
+  margin-bottom: .8rem;
+}
+.public-home .hero-sub {
+  color: #444;
+  margin-bottom: 1.2rem;
+}
+.public-home .hero-cta {
+  display: flex;
+  gap: .75rem;
+}
+
+/* NEWS */
+.public-home .cards.news {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: var(--gf-space-6);
+}
+.public-home .card {
+  background: #fff;
+  border-radius: var(--gf-radius-2);
+  box-shadow: var(--gf-shadow-1);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.public-home .card-body {
+  padding: var(--gf-space-4);
+}
+.public-home .card-title {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.public-home .card-text {
+  color: #555;
+  margin: .5rem 0;
+}
+.public-home .card-link {
+  text-decoration: none;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* HOWTO */
+.public-home .howto {
+  padding: var(--gf-space-6);
+  background: #fff;
+}
+.public-home .howto-grid {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.public-home .step {
+  background: var(--gris);
+  padding: 1rem;
+  border-radius: var(--gf-radius-2);
+  box-shadow: var(--gf-shadow-1);
+}
+
+/* METRICS */
+.public-home .metrics {
+  padding: var(--gf-space-6);
+  background: var(--color-bg);
+}
+.public-home .kpi {
+  text-align: center;
+  background: #fff;
+  border-radius: var(--gf-radius-2);
+  box-shadow: var(--gf-shadow-1);
+  padding: 1rem;
+}
+.public-home .kpi__value {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+/* FOOTER */
+.public-home .footer {
+  padding: 1.5rem 2rem;
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.public-home .footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.public-home .footer a:hover {
+  text-decoration: underline;
+}
+
+/*PARCHE*/
+.public-home .hero { padding: 3rem 2rem; background: var(--color-bg); }
+.public-home .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 2rem; }
+.public-home .hero-text { max-width: 640px; }
+.public-home .hero-media img { width: 100%; height: auto; border-radius: 16px; box-shadow: var(--shadow-light); object-fit: cover; }
+@media (max-width: 900px) { .public-home .hero-grid { grid-template-columns: 1fr; } }

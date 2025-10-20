@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Iniciar sesión · Cencosud Gases Free{% endblock %}
+{% block page_class %}login-page{% endblock %}
+
+{% block content %}
+
+<style>
+/* =========================================================
+   LOGIN PAGE (AISLADO A ESTA VISTA)
+   ========================================================= */
+.login-page {
+  --lp-bg: #f4f6f8;
+  --lp-card: #ffffff;
+  --lp-border: #e5e7eb;
+  --lp-text: #1f2937;
+  --lp-sub: #667085;
+  --lp-accent: #009f6b;     /* verde institucional */
+  --lp-accent-2: #00c18a;
+  --lp-shadow: 0 8px 24px rgba(0,0,0,.08);
+  --lp-radius-lg: 16px;
+  --lp-radius-sm: 10px;
+}
+
+.login-page .auth-layout{
+  min-height: calc(100vh - 0px); /* sin topbar en login */
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 2rem;
+  align-items: stretch;
+  padding: 3.25rem 2rem;
+  background: var(--lp-bg);
+}
+
+/* ================= IZQUIERDA: MARCA CENTRADA ================= */
+.login-page .auth-brand{
+  background: linear-gradient(135deg, rgba(0,159,107,.10), rgba(0,193,138,.06));
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius-lg);
+  box-shadow: var(--lp-shadow);
+  padding: 2.25rem 2rem;
+  display: grid;
+  place-items: center;               /* centra total */
+  text-align: center;                /* centra texto */
+}
+
+.login-page .auth-brand .brand-head{
+  display: flex; align-items: center; gap: 0.9rem;
+  justify-content: center;           /* centra fila */
+  margin-bottom: .3rem;
+}
+
+.login-page .auth-brand .brand-pill{
+  width: 90px; height: 90px; display:grid; place-items:center;
+  border-radius: 12px;
+  color: #fff; font-size: 3rem;
+}
+
+.login-page .auth-brand h1{
+  margin: 0; font-size: 3rem;
+  color: var(--lp-text); font-weight: 800;
+}
+
+.login-page .auth-brand .brand-sub{
+  margin-top: .45rem; color: var(--lp-sub);
+  font-size: 1rem;
+}
+
+/* Métricas bajo el subtítulo */
+.login-page .brand-metrics{
+  margin-top: 1.1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: .75rem;
+  width: min(560px, 100%);
+}
+.login-page .metric{
+  background: #fff;
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius-sm);
+  padding: .75rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+.login-page .metric strong{
+  display:block; font-size: 1.15rem; color: var(--lp-accent);
+}
+.login-page .metric small{
+  color:#4b5563;
+}
+
+/* Olas opcionales */
+.login-page .auth-brand .waves{
+  margin-top: 1.25rem; width: 100%; height: 110px;
+}
+
+/* ================= DERECHA: TARJETA LOGIN ================= */
+.login-page .login-card{
+  background: var(--lp-card);
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius-lg);
+  box-shadow: var(--lp-shadow);
+  padding: 2rem 1.75rem;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.login-page .login-card .card-header h3{
+  margin: 0 0 .35rem 0; font-size: 1.35rem; color: var(--lp-text);
+}
+.login-page .login-card .card-header small{
+  color: var(--lp-sub); font-size: .95rem;
+}
+
+/* GRID DE ROLES (auto-fit para 5 roles) */
+.login-page .roles-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.1rem 0 1.25rem 0;
+}
+.login-page .role{
+  border: 1px solid var(--lp-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.login-page .role:hover{ box-shadow: var(--lp-shadow); }
+.login-page .role:active{ transform: translateY(1px); }
+.login-page .role.active{ border-color: var(--lp-accent); box-shadow: 0 0 0 3px rgba(0,159,107,.12); }
+.login-page .role .role-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; }
+.login-page .role .icon{ font-size:1.25rem; }
+.login-page .role .check{ font-weight:700; color: var(--lp-accent); opacity:0; transition:opacity .2s; }
+.login-page .role.active .check{ opacity: 1; }
+.login-page .role h4{ margin:0 0 .2rem 0; font-size:1.05rem; color: var(--lp-text); font-weight: 700; }
+.login-page .role p{ margin:0; color: var(--lp-sub); font-size: .95rem; }
+
+/* BOTÓN CONTINUAR */
+.login-page .btn.primary{
+  display: inline-flex; align-items:center; justify-content:center;
+  background: var(--lp-accent); color: #fff; font-weight: 800;
+  padding: .7rem 1.2rem; border-radius: 12px; border: none;
+  cursor: pointer; transition: background .2s ease, opacity .2s ease;
+}
+.login-page .btn.primary:hover{ background: var(--lp-accent-2); }
+.login-page .btn.primary:disabled{ opacity: .55; cursor: not-allowed; }
+
+/* LINK OLVIDO */
+.login-page .links{ margin-top: .9rem; }
+.login-page .links a{ color: var(--lp-accent); text-decoration: none; font-weight: 700; }
+.login-page .links a:hover{ text-decoration: underline; }
+
+/* Accesibilidad: foco visible en roles y botón */
+.login-page .role:focus-visible,
+.login-page .btn.primary:focus-visible{
+  outline: 3px solid rgba(0,159,107,.3);
+  outline-offset: 2px;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .login-page .role,
+  .login-page .btn.primary{ transition: none; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px){
+  .login-page .auth-layout{ grid-template-columns: 1fr; }
+  .login-page .login-card{ margin-top: 1rem; }
+  .login-page .brand-metrics{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px){
+  .login-page .brand-metrics{ grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="auth-layout">
+  <!-- IZQUIERDA: MARCA CENTRADA CON MÉTRICAS -->
+  <section class="auth-brand">
+    <div>
+      <div class="brand-head">
+        <span class="brand-pill">🍃</span>
+        <h1>Cencosud Gases Free</h1>
+      </div>
+      <p class="brand-sub">Gestión y seguimiento de carbono neutralidad</p>
+
+      <!-- TRES MÉTRICAS BONITAS -->
+      <div class="brand-metrics" aria-label="Métricas destacadas">
+        <div class="metric">
+          <strong>45%</strong>
+          <small>Reducción de CO₂ vs 2020</small>
+        </div>
+        <div class="metric">
+          <strong>15.000+</strong>
+          <small>Usuarios participando</small>
+        </div>
+        <div class="metric">
+          <strong>6 países</strong>
+          <small>Cobertura operacional</small>
+        </div>
+      </div>
+
+      <!-- Olas decorativas (opcional) -->
+      <svg class="waves near" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,140 C120,190 240,90 360,140 C480,190 540,120 600,150 L600,200 L0,200 Z" opacity="0.10" fill="#fff"/>
+        <path d="M0,150 C130,110 230,200 360,150 C470,110 530,170 600,150 L600,200 L0,200 Z" opacity="0.07" fill="#fff"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- DERECHA: CARD LOGIN -->
+  <section class="login-card">
+    <header class="card-header">
+      <h3>Iniciar sesión</h3>
+      <small>Selecciona tu rol para continuar</small>
+    </header>
+
+    <div class="roles-grid" id="roles">
+      <button class="role" type="button" data-role="director">
+        <div class="role-top"><span class="icon">🎯</span><span class="check">✓</span></div>
+        <h4>Director</h4>
+        <p>Visión estratégica y aprobación global</p>
+      </button>
+
+      <button class="role" type="button" data-role="gerente">
+        <div class="role-top"><span class="icon">🏢</span><span class="check">✓</span></div>
+        <h4>Gerente</h4>
+        <p>Desempeño por área y recursos</p>
+      </button>
+
+      <button class="role" type="button" data-role="coordinador">
+        <div class="role-top"><span class="icon">🧭</span><span class="check">✓</span></div>
+        <h4>Coordinador de Proyectos</h4>
+        <p>Coordinación de sedes e iniciativas</p>
+      </button>
+
+      <button class="role" type="button" data-role="analista">
+        <div class="role-top"><span class="icon">📊</span><span class="check">✓</span></div>
+        <h4>Analista Ambiental</h4>
+        <p>Gestión y soporte interno</p>
+      </button>
+
+      <!-- Etiqueta visible "Staff", pero mantiene data-role="operador" para usar la vista actual -->
+      <button class="role" type="button" data-role="operador">
+        <div class="role-top"><span class="icon">🧰</span><span class="check">✓</span></div>
+        <h4>Staff (Operaciones)</h4>
+        <p>Ingreso de consumos y ejecución</p>
+      </button>
+    </div>
+
+    <button id="go" class="btn primary" disabled>Continuar</button>
+    <div class="links"><a href="/accounts/password_reset/">¿Olvidaste tu contraseña?</a></div>
+  </section>
+</div>
+
+<!-- JS: SELECCIÓN DE ROL Y REDIRECCIÓN (con soporte teclado) -->
+<script>
+(function(){
+  let selected = null;
+  const roles = document.querySelectorAll('.roles-grid .role');
+  const btn = document.getElementById('go');
+
+  roles.forEach(r => {
+    r.setAttribute('tabindex', '0'); // foco con teclado
+    r.addEventListener('click', select);
+    r.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select.call(r); }
+    });
+  });
+
+  function select(){
+    roles.forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    selected = this.getAttribute('data-role');
+    btn.disabled = false;
+  }
+
+  btn.addEventListener('click', goNext);
+  btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter') goNext(); });
+
+  function goNext(){
+    if (!selected) return;
+    // Si usas namespacing en urls, también puedes mapear aquí casos especiales
+    const next = encodeURIComponent(`/dashboard/${selected}/`);
+    window.location.href = `/accounts/login/?next=${next}`;
+  }
+})();
+</script>
+
+{% endblock %}

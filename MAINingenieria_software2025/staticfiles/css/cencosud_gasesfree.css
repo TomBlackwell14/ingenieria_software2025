@@ -1,0 +1,618 @@
+/* ===============================================================
+   CENCOSUD GASES FREE - ESTILOS UNIFICADOS
+   Archivo: cencosud_gasesfree.css
+   Combina: auth.css + role_login.css + director.css + home_ciudadano.css
+   =============================================================== */
+
+
+/* ===============================================================
+   1. VARIABLES GLOBALES Y BASE DE COLOR
+   =============================================================== */
+:root{
+  --verde:#009f6b;
+  --verde-claro:#00c18a;
+  --gris:#f6f6f6;
+  --borde:#ddd;
+  --texto:#222;
+  --color-primary:#1b7a4a;
+  --color-secondary:#0d2a3e;
+  --color-tertiary:#7acaa3;
+  --color-background:#f4f6f8;
+  --color-card-bg:#ffffff;
+  --color-border:#e0e0e0;
+  --color-success:#1b7a4a;
+  --color-danger:#b32121;
+  --color-warning:#b36b00;
+  --shadow-light:0 4px 12px rgba(0,0,0,0.05);
+  --shadow-hover:0 6px 16px rgba(0,0,0,0.1);
+}
+
+/* ===============================================================
+   2. RESETEO Y ESTILOS BASE
+   =============================================================== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Segoe UI",sans-serif;
+  background:var(--color-background);
+  color:var(--texto);
+  line-height:1.5;
+}
+
+/* ===============================================================
+   3. LOGIN Y AUTENTICACION (auth.css + role_login.css)
+   =============================================================== */
+
+/* === CONTENEDOR GENERAL === */
+.page{
+  display:flex;
+  align-items:stretch;
+  min-height:100vh;
+}
+
+/* === PANEL IZQUIERDO BRAND === */
+.brand{
+  flex:1 1 50%;
+  background:#009f6b !important;
+  background-image:linear-gradient(135deg,var(--verde),var(--verde-claro)) !important;
+  color:#fff !important;
+  padding:60px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.brand *{color:inherit;}
+.brand-head{display:flex;align-items:center;gap:12px;}
+.brand-pill{background:rgba(255,255,255,.2);border-radius:50%;padding:8px;font-size:24px;}
+.brand-sub{margin-top:10px;font-size:18px;opacity:.9;}
+.waves{position:absolute;bottom:0;left:0;width:100%;pointer-events:none;}
+
+/* BENEFICIOS IZQUIERDA */
+.benefits{margin-top:50px;display:flex;flex-direction:column;gap:15px;}
+.benefit{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.15);padding:12px 16px;border-radius:12px;}
+.b-ico{font-size:22px;}
+.mini-stats{display:flex;gap:15px;margin-top:40px;}
+.mini-card{background:rgba(255,255,255,.15);padding:12px 18px;border-radius:10px;text-align:center;}
+.mini-card strong{display:block;font-size:22px;}
+
+/* === PANEL DERECHO LOGIN === */
+.right{
+  flex:1 1 50%;
+  background:var(--gris);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+}
+.card{
+  background:#fff;
+  padding:40px;
+  border-radius:14px;
+  box-shadow:0 14px 40px rgba(0,0,0,.10);
+  width:520px;
+  max-width:92%;
+  position:relative;
+}
+.card-header{text-align:center;margin-bottom:20px;}
+.card-header h3{margin:0;color:var(--verde);}
+
+/* === GRID DE ROLES === */
+.roles-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:24px;
+}
+.role{
+  background:#fafafa;
+  border:2px solid var(--borde);
+  border-radius:12px;
+  padding:14px;
+  text-align:left;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.role-top{display:flex;align-items:center;gap:8px;}
+.role .icon{font-size:22px;}
+.role .check{display:none;color:var(--verde);font-weight:700;}
+.role.active{
+  border-color:#2f6fff;
+  box-shadow:0 0 0 3px rgba(47,111,255,.25);
+  background:#fff;
+}
+.role.active .check{display:inline;}
+
+/* === BOTON === */
+.btn.primary{
+  background:#2f6fff;
+  color:#fff;
+  border:none;
+  padding:12px 0;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+  width:100%;
+  transition:.2s;
+}
+.btn.primary:disabled{opacity:.55;cursor:not-allowed;}
+.btn.primary:hover:not(:disabled){filter:brightness(1.05);}
+
+/* === LINKS === */
+.links{text-align:center;margin-top:14px;}
+.links a{color:#2f6fff;text-decoration:none;}
+.links a:hover{text-decoration:underline;}
+
+/* === BUBBLES DECORATIVAS === */
+.bubbles::before,.bubbles::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  background:rgba(0,159,107,.05);
+  z-index:-1;
+}
+.bubbles::before{width:300px;height:300px;top:-100px;right:-80px;}
+.bubbles::after{width:200px;height:200px;bottom:-60px;left:-50px;}
+
+/* === RESPONSIVE LOGIN === */
+@media (max-width:900px){
+  .page{flex-direction:column;}
+  .brand{padding:40px 20px;}
+  .card{margin:20px;width:auto;}
+}
+
+/* ===============================================================
+   4. DASHBOARD DIRECTOR (director.css)
+   =============================================================== */
+.dashboard-director{
+  max-width:1300px;
+  margin:20px auto;
+  padding:0 15px;
+}
+.header-card,.chart-card,.data-section{
+  background:var(--color-card-bg);
+  border-radius:12px;
+  box-shadow:var(--shadow-light);
+  padding:24px;
+  margin-bottom:24px;
+  transition:box-shadow .3s ease;
+}
+.header-card:hover,.chart-card:hover,.data-section:hover{box-shadow:var(--shadow-hover);}
+h2{margin:0 0 4px 0;color:var(--color-secondary);font-weight:600;}
+.subtitle{color:#6c757d;font-size:.9em;}
+.section-title,.chart-title{margin-top:0;color:var(--color-secondary);font-weight:600;font-size:1.5em;}
+.section-subtitle{display:block;margin-bottom:15px;color:#888;}
+.section-divider{border:0;height:1px;background-color:var(--color-border);margin:15px 0 20px 0;}
+
+/* KPI GRID */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+  margin-bottom:16px;
+}
+.kpi-card{
+  text-align:center;
+  padding:15px;
+  border:1px solid var(--color-border);
+  border-radius:10px;
+  background:#fcfcfc;
+  box-shadow:0 2px 4px rgba(0,0,0,0.03);
+}
+.kpi-label{display:block;font-size:.85em;color:#6c757d;margin-bottom:4px;}
+.kpi-value{font-size:2.2em;font-weight:700;line-height:1.2;}
+.primary-value{color:var(--color-primary);}
+.secondary-value{color:var(--color-secondary);}
+.tertiary-value{color:var(--color-tertiary);}
+
+/* ALERTAS */
+.alert-section{
+  padding:15px 20px;
+  border-radius:10px;
+  border-left:5px solid;
+  margin-bottom:24px;
+  box-shadow:var(--shadow-light);
+}
+.alert-danger{background:#fff5f5;border-color:var(--color-danger);}
+.alert-success{background:#e8f5e9;border-color:var(--color-success);}
+.alert-title{font-weight:600;}
+.alert-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.alert-tag{padding:8px 15px;border-radius:8px;font-weight:600;font-size:.9em;white-space:nowrap;}
+.success-tag{background:var(--color-success);color:white;}
+.danger-tag{background:#ffe8e8;color:#6a1b1b;}
+
+/* TABLAS */
+.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.95em;}
+.data-table th,.data-table td{padding:12px;text-align:left;border-bottom:1px solid var(--color-border);}
+.data-table tbody tr:nth-child(even){background-color:#fafafa;}
+.data-table tbody tr:hover{background-color:#f0f4f7;}
+.no-data{text-align:center!important;color:#888;padding:20px!important;}
+
+/* BOTONES */
+.btn-primary{background-color:var(--color-primary);color:white;}
+.btn-primary:hover:not(:disabled){background-color:#155e37;}
+.btn-secondary{background-color:#edf6ff;color:#0c3a67;}
+.btn-secondary:hover:not(:disabled){background-color:#dae7f4;}
+.btn:disabled{background-color:#ccc;cursor:not-allowed;color:#666;opacity:.8;}
+
+/* ===============================================================
+   5. PORTAL CIUDADANO Y BASE DE SITIO (home_ciudadano.css)
+   =============================================================== */
+:root{
+  --bg:#f3f8f5;
+  --panel:#ffffff;
+  --ink:#0f1e16;
+  --muted:#5b6a61;
+  --brand:#1ea97c;
+  --brand-ink:#0b6a4f;
+  --edge:#e3eee8;
+  --chip:#eef8f3;
+  --success:#e8fbef;
+  --info:#e9f4ff;
+  --radius:14px;
+  --shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+/* TOPBAR */
+.topbar{
+  max-width:1200px;
+  margin:0 auto;
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand{display:flex;gap:12px;align-items:center;}
+.logo{
+  width:44px;height:44px;border-radius:12px;
+  display:grid;place-items:center;
+  background:var(--chip);color:var(--brand-ink);
+  box-shadow:var(--shadow);
+}
+.brand-text h1{margin:0;font-size:20px;}
+.brand-text p{margin:2px 0 0;color:var(--muted);font-size:12px;}
+.actions{display:flex;gap:12px;align-items:center;}
+.actions .btn{
+  text-decoration:none;
+  background:var(--brand);
+  color:white;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:600;
+  box-shadow:var(--shadow);
+}
+.actions .btn:hover{filter:brightness(.95);}
+
+/* HERO */
+.hero{text-align:center;margin-top:10px;margin-bottom:8px;}
+.hero h2{margin:8px 0 4px;font-size:28px;}
+.hero p{margin:0;color:var(--muted);}
+
+/* KPIS */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:12px;margin-bottom:24px;}
+.kpi{
+  background:var(--panel);
+  border:1px solid var(--edge);
+  border-radius:var(--radius);
+  padding:18px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  box-shadow:var(--shadow);
+}
+.kpi-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:grid;place-items:center;
+  background:var(--chip);color:var(--brand-ink);
+}
+.kpi-meta h3{margin:0;font-size:26px;letter-spacing:.3px;}
+.kpi-meta span{display:block;color:var(--muted);font-size:13px;margin-top:4px;}
+
+/* TARJETAS DE NOTICIAS */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.card{
+  background:var(--panel);
+  border:1px solid var(--edge);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+.thumb{height:180px;background:linear-gradient(120deg,#e7f6ee,#d6efe5);}
+.card-body{padding:14px;}
+.card-body h4{margin:8px 0 6px;font-size:18px;}
+.card-body p{margin:0 0 10px;color:var(--muted);}
+.card-link{color:var(--brand-ink);text-decoration:none;font-weight:600;}
+.card-link:hover{text-decoration:underline;}
+
+/* FOOTER */
+.footer{
+  margin-top:26px;
+  padding:24px;
+  border-top:1px solid var(--edge);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--muted);
+}
+.footer a{color:inherit;text-decoration:none;margin-left:12px;}
+.footer a:hover{text-decoration:underline;}
+
+/* RESPONSIVE */
+@media (max-width:1100px){
+  .kpis{grid-template-columns:repeat(2,1fr);}
+  .cards{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:720px){
+  .topbar{flex-direction:column;gap:14px;}
+  .actions{flex-wrap:wrap;justify-content:center;}
+  .kpis{grid-template-columns:1fr;}
+  .cards{grid-template-columns:1fr;}
+  .hero h2{font-size:22px;}
+}
+
+
+
+
+/* ===============================================================
+    PARCHE 1 HOME CIUDADANO - NUEVO DISEÑO PORTAL PÚBLICO
+   =============================================================== */
+
+/* CONTENEDOR GENERAL */
+.public-home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 40px;
+  background: var(--color-background);
+}
+
+/* ======= TOPBAR ======= */
+.topbar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar .logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--chip);
+  color: var(--brand-ink);
+  box-shadow: var(--shadow);
+  font-size: 22px;
+}
+.topbar .brand-text h1 {
+  font-size: 20px;
+  margin: 0;
+  color: var(--brand-ink);
+}
+.topbar .brand-text p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.topbar .actions .btn {
+  background: var(--brand);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: 0.2s;
+}
+.topbar .actions .btn:hover {
+  filter: brightness(0.95);
+}
+
+/* ======= HERO ======= */
+.hero {
+  text-align: center;
+  margin-top: 0;
+}
+.hero h2 {
+  font-size: 34px;
+  color: var(--brand-ink);
+  margin-bottom: 10px;
+}
+.hero p {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ======= NOTICIAS ======= */
+.cards.news {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+.card .thumb {
+  height: 180px;
+  background: linear-gradient(120deg, #e7f6ee, #d6efe5);
+}
+.card-body {
+  padding: 16px;
+}
+.card-body h4 {
+  font-size: 18px;
+  margin: 8px 0 6px;
+  color: var(--ink);
+}
+.card-body p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.card-link {
+  color: var(--brand-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.card-link:hover {
+  text-decoration: underline;
+}
+
+/* ======= COMO PARTICIPAR ======= */
+.participa-card {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.participa-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+.participa-card h4 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--brand-ink);
+}
+.participa-card p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ======= BOTÓN PRIMARIO ======= */
+.btn.primary {
+  background: var(--brand);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn.primary:hover {
+  filter: brightness(1.05);
+}
+
+/* ======= FAQ ======= */
+.faq {
+  margin: 0 auto;
+  max-width: 900px;
+}
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.faq-item {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 18px;
+}
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--brand-ink);
+}
+.faq-item p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ======= KPI (DATOS Y REPORTES) ======= */
+.kpi {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.kpi:hover {
+  transform: translateY(-3px);
+}
+.kpi h3 {
+  font-size: 28px;
+  color: var(--brand-ink);
+  margin-bottom: 4px;
+}
+.kpi span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ======= FOOTER ======= */
+.footer {
+  margin-top: auto;
+  padding: 24px;
+  border-top: 1px solid var(--edge);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  background: #fff;
+}
+.footer nav a {
+  color: inherit;
+  text-decoration: none;
+  margin-left: 12px;
+}
+.footer nav a:hover {
+  text-decoration: underline;
+}
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 1100px) {
+  .cards.news {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  .cards.news {
+    grid-template-columns: 1fr;
+  }
+  .participa-card {
+    padding: 18px;
+  }
+}
