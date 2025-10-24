@@ -1,0 +1,23 @@
+<!-- Corrección final: Usar clases CSS dinámicas -->
+<style>
+  .alert {
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: .8rem;
+  }
+  .alert.rojo {
+    border-left: 6px solid #d14343;
+  }
+  .alert.amarillo {
+    border-left: 6px solid #e7b416;
+  }
+  .alert.verde {
+    border-left: 6px solid #2e7d32;
+  }
+</style>
+
+<article class="alert {{ a.nivel }}">
+  <strong>{{ a.titulo }}</strong>
+  <p style="margin:0;color:#555;">{{ a.descripcion }}</p>
+</article>

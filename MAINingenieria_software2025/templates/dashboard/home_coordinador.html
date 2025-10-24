@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-coordinador{% endblock %}
+
+{% block content %}
+<header class="topbar role-coordinador" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📋</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Coordinador de Proyectos</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#resumen">Resumen</a>
+    <a href="#iniciativas">Iniciativas</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<main class="dashboard-coordinador" style="padding:clamp(20px,3vw,40px);max-width:1400px;margin:0 auto;display:grid;gap:32px;">
+
+  <!-- =========================================================
+       RESUMEN EJECUTIVO + KPIS (DEMO)
+       ========================================================= -->
+  <section id="resumen" class="header-card" style="background:#fff;border-radius:16px;box-shadow:var(--shadow-light);padding:1.5rem;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+      <div>
+        <h2 style="margin:0 0 .25rem 0;">Resumen Ejecutivo</h2>
+        <p style="margin:0;color:#444">Vista general de iniciativas y su impacto esperado (DEMO sin BD).</p>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button id="btn-sembrar" class="btn btn--secondary" type="button" title="Genera datos ficticios">Sembrar datos demo</button>
+        <button id="btn-limpiar" class="btn" type="button" title="Borra los datos de demo">Limpiar demo</button>
+      </div>
+    </div>
+
+    <!-- KPIS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:1rem;">
+      <article style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;">
+        <h4 style="margin:0 0 .25rem 0;color:#111827;">Iniciativas</h4>
+        <strong id="kpi-iniciativas" style="font-size:1.6rem;">—</strong>
+        <p style="margin:.25rem 0 0 0;color:#6b7280;">Total registradas</p>
+      </article>
+      <article style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;">
+        <h4 style="margin:0 0 .25rem 0;color:#111827;">Avance global</h4>
+        <strong id="kpi-avance" style="font-size:1.6rem;">—</strong>
+        <p style="margin:.25rem 0 0 0;color:#6b7280;">Promedio % completado</p>
+      </article>
+      <article style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;">
+        <h4 style="margin:0 0 .25rem 0;color:#111827;">Reducción esperada</h4>
+        <strong id="kpi-reduccion" style="font-size:1.6rem;">—</strong>
+        <p style="margin:.25rem 0 0 0;color:#6b7280;">tCO₂e evitadas (estimado)</p>
+      </article>
+      <article style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;">
+        <h4 style="margin:0 0 .25rem 0;color:#111827;">CapEx total</h4>
+        <strong id="kpi-capex" style="font-size:1.6rem;">—</strong>
+        <p style="margin:.25rem 0 0 0;color:#6b7280;">USD (estimado)</p>
+      </article>
+    </div>
+
+    <!-- PROGRESO GLOBAL VS META (DEMO) -->
+    <div style="margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <h4 style="margin:0;color:#111827;">Progreso del portafolio</h4>
+        <small style="color:#6b7280;">Meta global demo: <strong id="demo-meta">40%</strong></small>
+      </div>
+      <div style="position:relative;height:16px;background:#eef2f3;border-radius:999px;overflow:hidden;margin-top:.5rem;">
+        <div id="barra-global" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--color-accent);transition:width .5s ease;"></div>
+      </div>
+      <p id="texto-global" style="margin:.5rem 0 0 0;color:#374151;">—</p>
+    </div>
+
+    <!-- DESGLOSE POR CATEGORIA -->
+    <div style="margin-top:1rem;">
+      <h4 style="margin:0 0 .25rem 0;color:#111827;">Desglose por categoría</h4>
+      <div id="grid-categorias" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;"></div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       REGISTRO DE INICIATIVAS (DEMO LOCALSTORAGE)
+       ========================================================= -->
+  <section id="iniciativas" class="header-card" style="background:#fff;border-radius:16px;box-shadow:var(--shadow-light);padding:1.5rem;">
+    <h2 style="margin:0 0 .5rem 0;">Registro de Iniciativas</h2>
+
+    <!-- FILTROS DE BUSQUEDA -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:1rem;">
+      <input id="busqueda" type="search" placeholder="Buscar por nombre o ubicación..." aria-label="Buscar">
+      <select id="filtro-categoria" aria-label="Filtrar por categoria">
+        <option value="">Todas las categorías</option>
+        <option value="Energia">Energia</option>
+        <option value="Transporte">Transporte</option>
+        <option value="Residuos">Residuos</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <select id="ordenar" aria-label="Ordenar">
+        <option value="-fecha">Mas recientes</option>
+        <option value="fecha">Mas antiguas</option>
+        <option value="-avance">Avance desc</option>
+        <option value="avance">Avance asc</option>
+      </select>
+      <button id="btn-aplicar-filtros" class="btn btn--secondary" type="button">Aplicar</button>
+    </div>
+
+    <form id="form-iniciativas" style="display:grid;gap:1rem;">
+      <div>
+        <label for="nombre">Nombre de la iniciativa:</label>
+        <input type="text" id="nombre" name="nombre" required>
+      </div>
+      <div>
+        <label for="descripcion">Descripcion:</label>
+        <textarea id="descripcion" name="descripcion" rows="3" required></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+        <div>
+          <label for="ubicacion">Ubicacion:</label>
+          <input type="text" id="ubicacion" name="ubicacion" required>
+        </div>
+        <div>
+          <label for="fecha">Fecha:</label>
+          <input type="date" id="fecha" name="fecha" required>
+        </div>
+        <div>
+          <label for="categoria">Categoria:</label>
+          <select id="categoria" name="categoria" required>
+            <option value="">Seleccione una categoria</option>
+            <option value="Energia">Energia</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Residuos">Residuos</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CAMPOS DEMO DE IMPACTO Y COSTOS -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+        <div>
+          <label for="reduccion">Reduccion esperada (tCO2e/año):</label>
+          <input type="number" step="0.01" min="0" id="reduccion" name="reduccion" placeholder="ej: 120.5" required>
+        </div>
+        <div>
+          <label for="capex">CapEx USD (opcional):</label>
+          <input type="number" step="0.01" min="0" id="capex" name="capex" placeholder="ej: 50000">
+        </div>
+        <div>
+          <label for="avance">Avance %:</label>
+          <input type="number" step="1" min="0" max="100" id="avance" name="avance" placeholder="0 a 100" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primary">Registrar Iniciativa</button>
+    </form>
+  </section>
+
+  <!-- =========================================================
+       LISTA DE INICIATIVAS (CARDS)
+       ========================================================= -->
+  <section id="lista-iniciativas" class="header-card" style="background:#fff;border-radius:16px;box-shadow:var(--shadow-light);padding:1.5rem;">
+    <h2 style="margin:0 0 .5rem 0;">Iniciativas Registradas</h2>
+    <div id="iniciativas-list" style="margin-top:1rem;"></div>
+  </section>
+</main>
+
+<!-- =========================================================
+     SCRIPT DEMO (SIN BD) - USA LOCALSTORAGE
+     COMENTARIOS EN MAYUSCULA Y SIN TILDES
+========================================================= -->
+<script>
+"use strict";
+
+// CLAVES LOCALSTORAGE
+const LS_KEY = 'gf_iniciativas_demo';
+
+// OBTENER/SET DATOS
+const getData = () => JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+const setData = (arr) => localStorage.setItem(LS_KEY, JSON.stringify(arr));
+
+// SEMBRAR DATOS DEMO (FICTICIOS CENCOSUD GASES FREE)
+function sembrarDemo(){
+  const demo = [
+    { nombre:"Fotovoltaico CD Quilicura", descripcion:"Instalacion solar en Centro de Distribucion.", ubicacion:"Quilicura, CL", fecha:"2025-07-01", categoria:"Energia", reduccion: 820.0, capex: 250000, avance: 55 },
+    { nombre:"Electromovilidad Ultima Milla", descripcion:"Piloto de vans electricas.", ubicacion:"RM, CL", fecha:"2025-05-20", categoria:"Transporte", reduccion: 410.5, capex: 180000, avance: 40 },
+    { nombre:"Iluminacion LED Hipermercados", descripcion:"Reemplazo masivo luminarias LED.", ubicacion:"Santiago, CL", fecha:"2025-03-15", categoria:"Energia", reduccion: 950.2, capex: 300000, avance: 75 },
+    { nombre:"Recuperacion de Refrigerantes", descripcion:"Programa de recaptura y mantenimiento.", ubicacion:"Valparaiso, CL", fecha:"2025-02-01", categoria:"Residuos", reduccion: 120.0, capex: 35000, avance: 30 },
+    { nombre:"Rutas Optimizadas TMS", descripcion:"Optimizacion de rutas logisticas con TMS.", ubicacion:"Concepcion, CL", fecha:"2025-06-10", categoria:"Transporte", reduccion: 260.0, capex: 50000, avance: 60 },
+    { nombre:"Compostaje y Economia Circular", descripcion:"Gestión organica y acuerdos con municipios.", ubicacion:"La Serena, CL", fecha:"2025-04-25", categoria:"Residuos", reduccion: 190.7, capex: 20000, avance: 35 },
+    { nombre:"Capacitacion EC y Buenas Practicas", descripcion:"Programa de eficiencia en tiendas.", ubicacion:"RM, CL", fecha:"2025-01-12", categoria:"Otro", reduccion: 75.0, capex: 8000, avance: 65 }
+  ];
+  setData(demo);
+}
+
+// LIMPIAR DEMO
+function limpiarDemo(){
+  localStorage.removeItem(LS_KEY);
+}
+
+// FORMATEOS
+const fmtPct = (x) => `${Math.round(Number(x)||0)}%`;
+const fmtNum = (x) => (Number(x)||0).toLocaleString('es-CL', {maximumFractionDigits:0});
+const fmtUsd = (x) => (Number(x)||0).toLocaleString('es-CL', {style:'currency', currency:'USD', maximumFractionDigits:0});
+const fmtTco2 = (x) => (Number(x)||0).toLocaleString('es-CL', {maximumFractionDigits:1}) + ' tCO₂e';
+
+// CALCULOS KPI
+function calcKPIs(arr){
+  const n = arr.length;
+  const avanceProm = n ? arr.reduce((s,a)=>s+(Number(a.avance)||0),0)/n : 0;
+  const reduccionTot = arr.reduce((s,a)=>s+(Number(a.reduccion)||0),0);
+  const capexTot = arr.reduce((s,a)=>s+(Number(a.capex)||0),0);
+  return { n, avanceProm, reduccionTot, capexTot };
+}
+
+// ACTUALIZAR KPIS Y PROGRESO GLOBAL
+function pintarKPIs(){
+  const data = getData();
+  const { n, avanceProm, reduccionTot, capexTot } = calcKPIs(data);
+
+  document.getElementById('kpi-iniciativas').textContent = fmtNum(n);
+  document.getElementById('kpi-avance').textContent = fmtPct(avanceProm);
+  document.getElementById('kpi-reduccion').textContent = fmtTco2(reduccionTot);
+  document.getElementById('kpi-capex').textContent = fmtUsd(capexTot);
+
+  const meta = 40; // META GLOBAL DEMO %
+  const barra = document.getElementById('barra-global');
+  const texto = document.getElementById('texto-global');
+  const width = Math.max(0, Math.min(100, avanceProm));
+  barra.style.width = width + '%';
+  const estado = avanceProm >= meta ? 'En linea con la meta' : 'Bajo la meta';
+  texto.textContent = `Avance promedio: ${fmtPct(avanceProm)} · ${estado}`;
+}
+
+// DESGLOSE POR CATEGORIA (CUENTA Y AVANCE PROM)
+function pintarCategorias(){
+  const data = getData();
+  const byCat = {};
+  data.forEach(i=>{
+    const k = i.categoria || 'Otro';
+    if(!byCat[k]) byCat[k] = {count:0, avanceSum:0, reduccion:0};
+    byCat[k].count++;
+    byCat[k].avanceSum += Number(i.avance)||0;
+    byCat[k].reduccion += Number(i.reduccion)||0;
+  });
+
+  const cont = document.getElementById('grid-categorias');
+  cont.innerHTML = '';
+  const cats = ['Energia','Transporte','Residuos','Otro'];
+  cats.forEach(c=>{
+    const info = byCat[c] || {count:0, avanceSum:0, reduccion:0};
+    const prom = info.count ? info.avanceSum / info.count : 0;
+
+    const card = document.createElement('article');
+    card.style = "background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;";
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h5 style="margin:0;color:#111827;">${c}</h5>
+        <span style="font-size:.9rem;color:#6b7280;">${fmtNum(info.count)} iniciativas</span>
+      </div>
+      <div style="position:relative;height:10px;background:#eef2f3;border-radius:999px;overflow:hidden;margin:.5rem 0;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:${Math.min(100,Math.max(0,prom))}%;background:#10b981;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:#374151;font-size:.9rem;">
+        <span>Avance prom: <strong>${fmtPct(prom)}</strong></span>
+        <span>Reduccion: <strong>${fmtTco2(info.reduccion)}</strong></span>
+      </div>
+    `;
+    cont.appendChild(card);
+  });
+}
+
+// RENDER LISTA (CON FILTROS Y ORDEN)
+function renderLista(){
+  const cont = document.getElementById('iniciativas-list');
+  const data = getData();
+
+  const q = (document.getElementById('busqueda').value || '').toLowerCase();
+  const cat = document.getElementById('filtro-categoria').value;
+  const ord = document.getElementById('ordenar').value;
+
+  // FILTRAR
+  let arr = data.filter(i=>{
+    const okQ = !q || (i.nombre?.toLowerCase().includes(q) || i.ubicacion?.toLowerCase().includes(q));
+    const okC = !cat || i.categoria === cat;
+    return okQ && okC;
+  });
+
+  // ORDEN
+  const cmpNum = (a,b,field)=> (Number(a[field])||0) - (Number(b[field])||0);
+  const cmpStr = (a,b,field)=> String(a[field]||'').localeCompare(String(b[field]||''));
+  if (ord === 'fecha') arr.sort((a,b)=> cmpStr(a,b,'fecha'));
+  if (ord === '-fecha') arr.sort((a,b)=> cmpStr(b,a,'fecha'));
+  if (ord === 'avance') arr.sort((a,b)=> cmpNum(a,b,'avance'));
+  if (ord === '-avance') arr.sort((a,b)=> cmpNum(b,a,'avance'));
+
+  cont.innerHTML = '';
+
+  if (!arr.length){
+    cont.innerHTML = '<p style="color:#666;">No hay iniciativas registradas.</p>';
+    return;
+  }
+
+  arr.forEach((ini, idx)=>{
+    const card = document.createElement('div');
+    card.style = 'background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;margin-bottom:1rem;';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0 0 .25rem 0;color:#111827;">${ini.nombre}</h3>
+          <p style="margin:0 0 .25rem 0;color:#4b5563;">${ini.descripcion}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.9rem;color:#6b7280;">
+            <span>📍 ${ini.ubicacion}</span>
+            <span>⏱ ${ini.fecha}</span>
+            <span>🏷 ${ini.categoria}</span>
+          </div>
+        </div>
+        <div style="min-width:220px;">
+          <div style="font-size:.9rem;color:#6b7280;margin-bottom:.25rem;">Avance</div>
+          <div style="position:relative;height:10px;background:#eef2f3;border-radius:999px;overflow:hidden;">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:${Math.min(100,Math.max(0,Number(ini.avance)||0))}%;background:#3b82f6;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:.25rem;color:#374151;font-size:.9rem;">
+            <strong>${fmtPct(ini.avance)}</strong>
+            <span>${fmtTco2(ini.reduccion)} · ${fmtUsd(ini.capex||0)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    cont.appendChild(card);
+  });
+}
+
+// SUBMIT FORM: VALIDACIONES Y GUARDA
+document.getElementById('form-iniciativas').addEventListener('submit', function(ev){
+  ev.preventDefault();
+
+  const nombre = document.getElementById('nombre').value.trim();
+  const descripcion = document.getElementById('descripcion').value.trim();
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  const fecha = document.getElementById('fecha').value;
+  const categoria = document.getElementById('categoria').value;
+  const reduccion = Number(document.getElementById('reduccion').value);
+  const capex = Number(document.getElementById('capex').value || 0);
+  const avance = Number(document.getElementById('avance').value);
+
+  const arr = getData();
+  if (arr.some(i=> i.nombre.toLowerCase() === nombre.toLowerCase())){
+    alert('YA EXISTE UNA INICIATIVA CON ESTE NOMBRE. POR FAVOR ELIGE OTRO.');
+    return;
+  }
+  if (avance < 0 || avance > 100){
+    alert('AVANCE DEBE ESTAR ENTRE 0 Y 100.');
+    return;
+  }
+  if (reduccion < 0){
+    alert('LA REDUCCION NO PUEDE SER NEGATIVA.');
+    return;
+  }
+
+  arr.push({ nombre, descripcion, ubicacion, fecha, categoria, reduccion, capex, avance });
+  setData(arr);
+  this.reset();
+  pintarKPIs();
+  pintarCategorias();
+  renderLista();
+  alert('INICIATIVA REGISTRADA (DEMO).');
+});
+
+// FILTROS
+document.getElementById('btn-aplicar-filtros').addEventListener('click', renderLista);
+
+// BOTONES DEMO
+document.getElementById('btn-sembrar').addEventListener('click', ()=>{
+  sembrarDemo();
+  pintarKPIs();
+  pintarCategorias();
+  renderLista();
+  alert('DATOS DEMO GENERADOS.');
+});
+document.getElementById('btn-limpiar').addEventListener('click', ()=>{
+  limpiarDemo();
+  pintarKPIs();
+  pintarCategorias();
+  renderLista();
+  alert('DEMO LIMPIA.');
+});
+
+// INICIALIZACION
+document.addEventListener('DOMContentLoaded', ()=>{
+  // SI NO HAY DATOS, SIEMBRA UNA PRIMERA VEZ PARA QUE LUZCA
+  if (!getData().length) sembrarDemo();
+  pintarKPIs();
+  pintarCategorias();
+  renderLista();
+});
+</script>
+{% endblock %}

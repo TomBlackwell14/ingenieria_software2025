@@ -51,7 +51,7 @@ def _get_unidades_negocio():
         # SI TU MODELO TIENE FK A UNIDADNEGOCIO, PUEDES HACER .values('unidad_negocio__id','unidad_negocio__nombre')
         qs = (Emision.objects
               .values('unidad_negocio')  # AJUSTA NOMBRE DE CAMPO SI ES DIFERENTE
-              .annotate(cnt=Sum(F('consumo') * 0 + 1))
+              .annotate(cnt=Sum(F('consumo_cantidad') * 0 + 1))
               .order_by('unidad_negocio'))
         for r in qs:
             val = r.get('unidad_negocio') or "General"
@@ -83,8 +83,42 @@ def _contexto_base_analista(extra=None):
 # ============================================================
 @login_required
 def home_director(request):
-    # VISTA PROTEGIDA PARA DIRECTOR
-    return render(request, "dashboard/home_director.html")
+    # Datos simulados
+    context = {
+        'kpis': {
+            'fecha_actualizacion': "2025-10-24",
+            'linea_base_tco2e': 150.0,
+            'meta_tco2e': 100.0,
+            'actual_tco2e': 95.0,
+        },
+        'metas': {
+            'linea_base_tco2e': 150.0,
+            'meta_tco2e': 100.0,
+            'actual_tco2e': 95.0,
+            'anio_base': 2023,
+            'anio_meta': 2025,
+        },
+        'links': {
+            'metodologia': "#",
+            'descargar_pdf': "#",
+            'descargar_excel': "#",
+        },
+        'tendencia': [
+            {'anio': 2023, 'emisiones': 150.0},
+            {'anio': 2024, 'emisiones': 120.0},
+            {'anio': 2025, 'emisiones': 95.0},
+        ],
+        'top_fuentes': [
+            {'fuente': 'Combustible', 'emisiones': 50.0},
+            {'fuente': 'Electricidad', 'emisiones': 30.0},
+            {'fuente': 'Refrigerantes', 'emisiones': 15.0},
+        ],
+        'alertas': [
+            {'titulo': 'Desviación alta', 'descripcion': 'Las emisiones actuales superan el umbral esperado.', 'nivel': 'rojo', 'color': '#d14343'},
+            {'titulo': 'Meta alcanzada', 'descripcion': 'Las emisiones actuales están dentro del rango esperado.', 'nivel': 'verde', 'color': '#2e7d32'},
+        ],
+    }
+    return render(request, 'dashboard/home_director.html', context)
 
 def home_operador(request):
     """
@@ -134,119 +168,66 @@ def home_analista(request):
     """
     RENDERIZA EL PANEL DEL ANALISTA CON KPIS REALES (SI HAY DATOS) Y CONTEXTO BASE
     """
-    # KPIS REALES SI EXISTEN, CON FALLBACK SI LA TABLA ESTA VACIA
-    try:
-        normativas_total = Normativa.objects.count()
-        emisiones_total = Emision.objects.count()
-        iniciativas_total = Iniciativa.objects.count()
-        reportes_total = Reporte.objects.count()
-        alertas_total = Alerta.objects.filter(resuelta=False).count()
+    # Datos simulados
+    inventario = [
+        {'anio': 2023, 'total': 120.5},
+        {'anio': 2024, 'total': 110.3},
+        {'anio': 2025, 'total': 95.7},
+    ]
 
-        normativas = Normativa.objects.all().order_by('-fecha_revision')[:10]
-        emisiones = Emision.objects.all().order_by('-fecha')[:15]
-        iniciativas = Iniciativa.objects.all().order_by('-fecha_inicio')[:10]
-        reportes = Reporte.objects.all().order_by('-fecha_generacion')[:10]
-        alertas = Alerta.objects.filter(resuelta=False).order_by('-fecha')[:10]
-
-        extra = {
-            "normativas_total": normativas_total,
-            "emisiones_total": emisiones_total,
-            "iniciativas_total": iniciativas_total,
-            "reportes_total": reportes_total,
-            "alertas_total": alertas_total,
-            "normativas": normativas,
-            "emisiones": emisiones,
-            "iniciativas": iniciativas,
-            "reportes": reportes,
-            "alertas": alertas,
-        }
-    except Exception:
-        extra = {}
-
-    return render(request, "dashboard/home_analista.html", _contexto_base_analista(extra))
+    context = {
+        'kpi_total': "12.480",
+        'kpi_meta': "82%",
+        'kpi_iniciativas': "17",
+        'kpi_auditorias': "3",
+        'anios': [2023, 2024, 2025],
+        'unidades_negocio': [
+            {"id": "default", "nombre": "General"},
+        ],
+        'inventario': inventario,
+        'page_obj': None,
+    }
+    return render(request, 'dashboard/home_analista.html', context)
 
 # ============================================================
 # PORTAL CIUDADANO (PUBLICO)
 # ============================================================
 def home_ciudadano(request):
-    emisions_qs = Emision.objects.annotate(
-        tco2e=ExpressionWrapper(F('consumo') * F('factor_emision'), output_field=FloatField()),
-        anio=ExtractYear('fecha'),
-    )
-    serie = emisions_qs.values('anio').order_by('anio').annotate(total=Sum('tco2e'))
-    series_historico_labels = [str(x['anio']) for x in serie]
-    series_historico_emisiones = [round((x['total'] or 0.0), 1) for x in serie]
+    # Datos simulados
+    emisions_qs = [
+        {'anio': 2023, 'total': 120.5},
+        {'anio': 2024, 'total': 110.3},
+        {'anio': 2025, 'total': 95.7},
+    ]
+
+    series_historico_labels = [str(x['anio']) for x in emisions_qs]
+    series_historico_emisiones = [round(x['total'], 1) for x in emisions_qs]
 
     kpi_emisiones_tco2e = series_historico_emisiones[-1] if series_historico_emisiones else 0.0
     reduccion_pct = 0.0
     if len(series_historico_emisiones) >= 2 and series_historico_emisiones[0] > 0:
-        base = series_historico_emisiones[0]
-        reduccion_pct = round((base - kpi_emisiones_tco2e) * 100.0 / base, 1)
-    cumplimiento_meta_pct = round(Iniciativa.objects.aggregate(avg=Avg('avance'))['avg'] or 0.0, 1)
-
-    emisiones_por_fuente = []
-    if series_historico_labels:
-        anio_max = int(series_historico_labels[-1])
-        emisiones_por_fuente = list(
-            emisions_qs.filter(anio=anio_max)
-            .values('fuente')
-            .annotate(tco2e=Sum('tco2e'))
-            .order_by('-tco2e')
-        )
-    fuentes_labels = [e['fuente'] for e in emisiones_por_fuente] or ['Energia', 'Transporte', 'Residuos']
-    fuentes_values = [round(float(e['tco2e']), 1) for e in emisiones_por_fuente] or [60, 30, 10]
-
-    try:
-        grp = Group.objects.get(name__iexact="Ciudadano")
-        alertas = Alerta.objects.filter(visible_para=grp).order_by('-fecha')[:8]
-    except Group.DoesNotExist:
-        alertas = Alerta.objects.all().order_by('-fecha')[:8]
-
-    noticias = []
-    for a in alertas:
-        msg = a.mensaje or ""
-        resumen = msg if len(msg) <= 180 else msg[:180] + "…"
-        noticias.append({
-            "titulo": a.tipo,
-            "categoria": f"Severidad {getattr(a, 'severidad', 'NA')}",
-            "fecha": getattr(a, 'fecha', None).date() if getattr(a, 'fecha', None) else None,
-            "resumen": resumen,
-            "url": "#",
-        })
-
-    q = (request.GET.get('q') or '').strip()
-    normativas = Normativa.objects.all().order_by('pais', 'tipo', 'nombre')
-    iniciativas = Iniciativa.objects.all().order_by('-avance', '-fecha_inicio')
-    if q:
-        from django.db.models import Q
-        normativas = normativas.filter(
-            Q(nombre__icontains=q) | Q(descripcion__icontains=q) | Q(pais__icontains=q) | Q(tipo__icontains=q)
-        )
-        iniciativas = iniciativas.filter(
-            Q(nombre__icontains=q) | Q(descripcion__icontains=q) | Q(categoria__icontains=q) | Q(ubicacion__icontains=q)
+        reduccion_pct = round(
+            ((series_historico_emisiones[0] - series_historico_emisiones[-1]) / series_historico_emisiones[0]) * 100,
+            1,
         )
 
-    reportes_publicos = Reporte.objects.all().order_by('-fecha_generacion')[:10]
+    cumplimiento_meta_pct = 85.0  # Simulación
+
+    emisiones_por_fuente = [
+        {'fuente': 'Combustible', 'total': 50.0},
+        {'fuente': 'Electricidad', 'total': 30.0},
+        {'fuente': 'Refrigerantes', 'total': 15.0},
+    ]
 
     context = {
-        "kpi_emisiones_tco2e": kpi_emisiones_tco2e,
-        "reduccion_pct": reduccion_pct,
-        "cumplimiento_meta_pct": cumplimiento_meta_pct,
-        "series_historico_labels": series_historico_labels,
-        "series_historico_emisiones": series_historico_emisiones,
-        "emisiones_por_fuente": emisiones_por_fuente,
-        "fuentes_labels": fuentes_labels,
-        "fuentes_values": fuentes_values,
-        "noticias": noticias,
-        "iniciativas": iniciativas,
-        "reportes_publicos": reportes_publicos,
-        "normativas": normativas,
-        "energia_renovable_pct": 0,
-        "tco2e_compensadas": 0,
-        "comunidades_beneficiadas": 0,
-        "arboles_plantados": 0,
+        'series_historico_labels': series_historico_labels,
+        'series_historico_emisiones': series_historico_emisiones,
+        'kpi_emisiones_tco2e': kpi_emisiones_tco2e,
+        'reduccion_pct': reduccion_pct,
+        'cumplimiento_meta_pct': cumplimiento_meta_pct,
+        'emisiones_por_fuente': emisiones_por_fuente,
     }
-    return render(request, "dashboard/home_ciudadano.html", context)
+    return render(request, 'dashboard/home_ciudadano.html', context)
 
 # ============================================================
 # HANDLERS DE CARGAS (OPERADOR)
@@ -332,7 +313,7 @@ def analista_descargar_plantilla(request, formato="csv"):
 def analista_inventario(request):
     """
     HU-03: APLICA FILTROS Y RENDERIZA INVENTARIO. POR AHORA SIN BD DEVUELVE VACIO.
-    CUANDO CONECTES BD, ARMA LA QUERY Y PAGINACION AQUI.
+    CUANDO CONECTES BD, ARMA LA QUERY Y PAGINACION AHI.
     """
     ctx = _contexto_base_analista()
     return render(request, "dashboard/home_analista.html", ctx)
@@ -414,3 +395,75 @@ def analista_simulacion_historial(request):
         {"anio_base": 2025, "tipo": "meta_reduccion", "valor": 10, "resultado_tco2e": 11232.0},
     ]
     return JsonResponse({"escenarios": data})
+
+@login_required
+def home_gerente(request):
+    # Datos simulados para el gerente
+    context = {
+        'kpis': {
+            'fecha_actualizacion': "2025-10-24",
+            'linea_base_tco2e': 200.0,
+            'meta_tco2e': 120.0,
+            'actual_tco2e': 110.0,
+        },
+        'metas': {
+            'linea_base_tco2e': 200.0,
+            'meta_tco2e': 120.0,
+            'actual_tco2e': 110.0,
+            'anio_base': 2020,
+            'anio_meta': 2025,
+        },
+        'links': {
+            'metodologia': "#",
+            'descargar_pdf': "#",
+            'descargar_excel': "#",
+        },
+        'tendencia': [
+            {'anio': 2020, 'emisiones': 200.0},
+            {'anio': 2021, 'emisiones': 180.0},
+            {'anio': 2022, 'emisiones': 150.0},
+            {'anio': 2023, 'emisiones': 130.0},
+            {'anio': 2024, 'emisiones': 120.0},
+            {'anio': 2025, 'emisiones': 110.0},
+        ],
+        'top_fuentes': [
+            {'fuente': 'Transporte', 'emisiones': 80.0},
+            {'fuente': 'Industria', 'emisiones': 50.0},
+            {'fuente': 'Oficinas', 'emisiones': 30.0},
+        ],
+        'alertas': [
+            {'titulo': 'Incremento en transporte', 'descripcion': 'Las emisiones por transporte han aumentado.', 'nivel': 'amarillo', 'color': '#fbc02d'},
+            {'titulo': 'Meta alcanzada', 'descripcion': 'Las emisiones actuales están dentro del rango esperado.', 'nivel': 'verde', 'color': '#2e7d32'},
+        ],
+    }
+    return render(request, "dashboard/home_gerente.html", context)
+
+@login_required
+def home_coordinador(request):
+    # Datos simulados para el coordinador
+    context = {
+        'kpis': {
+            'fecha_actualizacion': "2025-10-24",
+        },
+        'iniciativas': [
+            {'nombre': 'Eficiencia Energética', 'descripcion': 'Reducción del consumo en oficinas.', 'ubicacion': 'Santiago', 'fecha': '2025-01-15', 'categoria': 'Energía'},
+            {'nombre': 'Transporte Verde', 'descripcion': 'Uso de vehículos eléctricos.', 'ubicacion': 'Valparaíso', 'fecha': '2025-03-10', 'categoria': 'Transporte'},
+        ],
+    }
+    return render(request, "dashboard/home_coordinador.html", context)
+
+# apps/dashboard/views.py
+
+from django.shortcuts import redirect
+from django.urls import reverse
+from datetime import date
+
+def analista_registro_manual(request):
+    if request.method == "POST":
+        # TODO: VALIDAR Y GUARDAR (VER PASO 2 PARA tCO2e)
+        # REDIRIGIR AL INVENTARIO PARA RECONSTRUIR SERIES Y VER EL GRAFICO
+        url = reverse("dashboard:analista_inventario")
+        return redirect(f"{url}#inventario")
+
+    # GET: RENDER DEL FORM (SI APLICA)
+    # return render(request, "dashboard/analista.html", {...})

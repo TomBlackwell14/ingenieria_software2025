@@ -9,6 +9,8 @@ urlpatterns = [
     path("director/",  views.home_director,  name="home_director"),
     path("operador/",  views.home_operador,  name="home_operador"),
     path("ciudadano/", views.home_ciudadano, name="home_ciudadano"),
+    path("gerente/",  views.home_gerente,  name="home_gerente"),
+    path("coordinador/",  views.home_coordinador,  name="home_coordinador"),
 
     # === OPERADOR ===
     path("operador/carga-masiva/", views.post_carga_masiva, name="post_carga_masiva"),
