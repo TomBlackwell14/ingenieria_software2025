@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-
 {% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
 
-{% block title %}Inicio Coordinador{% endblock %}
 {% block content %}
 
-<header class="topbar role-analista" role="banner">
+<header class="topbar role-coordinador" role="banner">
   <div class="brand">
     <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
     <div class="brand-text">
       <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
-      <p class="brand-text__tagline">Panel del COORDINADOR PROYECTO</p>
+      <p class="brand-text__tagline">Panel del Coordinador</p>
     </div>
   </div>
 
@@ -25,29 +25,30 @@
   </div>
 </header>
 
-<main>
-  <section>
-    <h1>Lista de Iniciativas</h1>
-
-    {% if iniciativas %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombres</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in iniciativas %}
-                <tr>
-                    <td>{{ i.nombre }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No hay iniciativas registradas.</p>
-    {% endif %}
-  </section>
+<main class="dashboard-analista container">
+<section id="inventario" class="card">
+  <h1>Lista de Iniciativas</h1>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in iniciativas %}
+        <tr>
+          <td>{{ i.nombre }}</td>
+          <td>{{ i.categoria }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" class="empty">Sin resultados</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 </main>
 
 
