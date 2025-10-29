@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Inicio Coordinador{% endblock %}
+{% block content %}
+
+<header class="topbar role-analista" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del COORDINADOR PROYECTO</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#">Registrar Iniciativa</a>
+    <a href="#">Ver Iniciativas</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h1>Lista de Iniciativas</h1>
+
+    {% if iniciativas %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombres</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in iniciativas %}
+                <tr>
+                    <td>{{ i.nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay iniciativas registradas.</p>
+    {% endif %}
+  </section>
+</main>
+
+
+{% endblock %}

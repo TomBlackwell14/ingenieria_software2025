@@ -414,3 +414,8 @@ def analista_simulacion_historial(request):
         {"anio_base": 2025, "tipo": "meta_reduccion", "valor": 10, "resultado_tco2e": 11232.0},
     ]
     return JsonResponse({"escenarios": data})
+
+
+def home_coordinador(request):
+    iniciativas = Iniciativa.objects.all()
+    return render(request, "dashboard/home_coordinador.html", {"iniciativas": iniciativas})
