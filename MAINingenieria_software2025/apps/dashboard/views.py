@@ -13,10 +13,11 @@ from django.contrib.auth.models import Group
 from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
 from django.db.models.functions import ExtractYear
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
-from django.urls import reverse, NoReverseMatch
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse, NoReverseMatch, reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
+from django.views.generic import UpdateView, DeleteView, CreateView
 
 from .models import Normativa, Emision, Iniciativa, Reporte, Alerta
 
@@ -415,7 +416,42 @@ def analista_simulacion_historial(request):
     ]
     return JsonResponse({"escenarios": data})
 
-
+# HU10
 def home_coordinador(request):
-    iniciativas = Iniciativa.objects.all()
-    return render(request, "dashboard/home_coordinador.html", {"iniciativas": iniciativas})
+    query = request.GET.get('q', '')
+    if query:
+        iniciativas = Iniciativa.objects.filter(nombre__icontains=query)
+    else:
+        iniciativas = Iniciativa.objects.all()
+
+    return render(request, 'dashboard/home_coordinador.html', {
+        'iniciativas': iniciativas,
+        'query': query,
+    })
+
+# HU10
+def detalle_iniciativa(request, pk):
+    iniciativa = get_object_or_404(Iniciativa, pk=pk)
+    return render(request, 'dashboard/detalle_iniciativa.html', {'iniciativa': iniciativa})
+
+# HU10
+class EditarIniciativaView(UpdateView):
+    model = Iniciativa
+    template_name = 'dashboard/editar_iniciativa.html'
+    fields = ['avance'] 
+
+    def get_success_url(self):
+        return reverse_lazy('dashboard:detalle_iniciativa', kwargs={'pk': self.object.pk})
+    
+# HU10    
+class EliminarIniciativaView(DeleteView):
+    model = Iniciativa
+    template_name = 'dashboard/eliminar_iniciativa.html'
+    success_url = reverse_lazy('dashboard:home_coordinador')
+
+# HU10
+class CrearIniciativaView(CreateView):
+    model = Iniciativa
+    template_name = 'dashboard/crear_iniciativa.html'
+    fields = ['nombre', 'categoria', 'ubicacion', 'fecha_inicio', 'capex', 'opex', 'reduccion_esperada', 'avance', 'descripcion'] 
+    success_url = reverse_lazy('dashboard:home_coordinador')

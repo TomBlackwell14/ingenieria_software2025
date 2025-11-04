@@ -23,4 +23,10 @@ urlpatterns = [
     path("analista/bitacora/",                views.analista_bitacora,              name="analista_bitacora"),
     path("analista/simulacion/",              views.analista_simulacion,            name="analista_simulacion"),
     path("analista/simulacion/historial/",    views.analista_simulacion_historial,  name="analista_simulacion_historial"),
+
+    # === COORDINADOR ===
+    path("coordinador/detalle/<int:pk>/",          views.detalle_iniciativa,               name="detalle_iniciativa"),
+    path('coordinador/detalle/<int:pk>/editar/',   views.EditarIniciativaView.as_view(),   name='editar_iniciativa'),
+    path('coordinador/detalle/<int:pk>/eliminar/', views.EliminarIniciativaView.as_view(), name='eliminar_iniciativa'),
+    path('coordinador/nueva/',                     views.CrearIniciativaView.as_view(),    name='crear_iniciativa'),
 ]

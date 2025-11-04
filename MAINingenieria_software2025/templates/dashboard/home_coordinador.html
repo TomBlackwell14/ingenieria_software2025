@@ -10,14 +10,9 @@
     <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
     <div class="brand-text">
       <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
-      <p class="brand-text__tagline">Panel del Coordinador finaaaaaaaaaaaaaaaaaaaaaaal</p>
+      <p class="brand-text__tagline">Panel del Coordinador</p>
     </div>
   </div>
-
-  <nav class="nav-links">
-    <a href="#">Registrar Iniciativa</a>
-    <a href="#">Ver Iniciativas</a>
-  </nav>
 
   <div class="actions">
     <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
@@ -26,14 +21,34 @@
 </header>
 
 <main class="dashboard-analista container">
-<section id="inventario" class="card">
-  <h1>Lista de Iniciativas</h1>
-  <div class="table-wrap">
-    <table>
-      <thead>
+<section id="inventario" class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Lista de Iniciativas</h1>
+    <a href="{% url 'dashboard:crear_iniciativa' %}" class="btn btn-success">
+      + Nueva Iniciativa
+    </a>
+  </div>
+
+  <!-- 🔍 Barra de búsqueda -->
+  <form method="get" class="d-flex mb-3" role="search">
+    <input 
+      class="form-control me-2" 
+      type="search" 
+      placeholder="Buscar iniciativa..." 
+      name="q" 
+      value="{{ query|default:'' }}"
+    >
+    <button class="btn btn-primary" type="submit">Buscar</button>
+  </form>
+
+  <!-- 🧾 Tabla con scroll -->
+  <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+    <table class="table table-striped table-hover align-middle mb-0">
+      <thead class="table-dark sticky-top">
         <tr>
           <th>Nombre</th>
           <th>Categoría</th>
+          <th>Acción</th>
         </tr>
       </thead>
       <tbody>
@@ -41,15 +56,22 @@
         <tr>
           <td>{{ i.nombre }}</td>
           <td>{{ i.categoria }}</td>
+          <td>
+            <a href="{% url 'dashboard:detalle_iniciativa' i.id %}" class="btn btn-outline-primary btn-sm">
+              Ver más
+            </a>
+          </td>
         </tr>
         {% empty %}
-        <tr><td colspan="2" class="empty">Sin resultados</td></tr>
+        <tr>
+          <td colspan="3" class="text-center text-muted fst-italic py-3">
+            Sin resultados
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </section>
 </main>
-
-
 {% endblock %}

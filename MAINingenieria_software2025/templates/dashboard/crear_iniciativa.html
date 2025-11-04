@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+
+<section class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <h1 class="text-center mb-4">Nueva Iniciativa</h1>
+
+  <form method="post" class="mx-auto" style="max-width: 600px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-success me-2">Guardar</button>
+      <a href="{% url 'dashboard:home_coordinador' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
