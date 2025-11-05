@@ -14,6 +14,11 @@
     </div>
   </div>
 
+    <nav class="nav-links">
+    <a href="#dashboard-iniciativas">Dashboard</a>
+    <a href="#">Comparativa</a>
+  </nav>
+
   <div class="actions">
     <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
     <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
@@ -21,6 +26,7 @@
 </header>
 
 <main class="dashboard-analista container">
+<!-- HU10 GESTION INICIATIVAS -->
 <section id="inventario" class="card shadow-sm p-4 mb-5 bg-white rounded">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">Lista de Iniciativas</h1>
@@ -29,7 +35,6 @@
     </a>
   </div>
 
-  <!-- 🔍 Barra de búsqueda -->
   <form method="get" class="d-flex mb-3" role="search">
     <input 
       class="form-control me-2" 
@@ -41,7 +46,6 @@
     <button class="btn btn-primary" type="submit">Buscar</button>
   </form>
 
-  <!-- 🧾 Tabla con scroll -->
   <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
     <table class="table table-striped table-hover align-middle mb-0">
       <thead class="table-dark sticky-top">
@@ -73,5 +77,165 @@
     </table>
   </div>
 </section>
+
+<!-- HU11 VISUALIZACION METRICAS INICIATIVAS -->
+<section id="dashboard-iniciativas" class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Visualización de Métricas generales y Graficos</h1>
+    <a href="#" class="btn btn-success">
+      + Exportar a PDF
+    </a>
+  </div>
+
+  <div class="row text-center">
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <h5 class="card-title text-success fw-bold">Iniciativas Activas</h5>
+          <p class="card-text fs-3">{{ metricas.total_activas }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-secondary">
+        <div class="card-body">
+          <h5 class="card-title text-secondary fw-bold">Iniciativas Finalizadas</h5>
+          <p class="card-text fs-3">{{ metricas.total_finalizadas }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-primary">
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bold">Avance Promedio</h5>
+          <p class="card-text fs-3">{{ metricas.avance_promedio }}%</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <h5 class="card-title text-info fw-bold">Emisiones Reducidas Totales</h5>
+          <p class="card-text fs-3">{{ metricas.emisiones_totales }} tCO₂e</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ metricas|json_script:"metricas-data" }}
+
+<section id="graficos" class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <div class="row">
+    <!-- Gráfico de barras -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-center">Estado de Iniciativas</h5>
+          <canvas id="graficoBarras"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico de pastel -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-center">Distribución de Avance</h5>
+          <canvas id="graficoPastel"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+  const metricas = JSON.parse(document.getElementById('metricas-data').textContent);
+
+  const totalActivas = metricas.total_activas;
+  const totalFinalizadas = metricas.total_finalizadas;
+  const avancePromedio = metricas.avance_promedio;
+  const emisionesTotales = metricas.emisiones_totales;
+
+  console.log('metricas cargadas:', metricas);
+
+  // --- 📊 Gráfico de Barras ---
+  const ctxBar = document.getElementById('graficoBarras').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['Activas', 'Finalizadas', 'Avance Promedio (%)', 'Emisiones Reducidas (tCO₂e)'],
+      datasets: [{
+        label: 'Métricas',
+        data: [totalActivas, totalFinalizadas, avancePromedio, emisionesTotales],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.6)',  // Verde-agua
+          'rgba(153, 102, 255, 0.6)', // Violeta
+          'rgba(255, 206, 86, 0.6)',  // Amarillo
+          'rgba(54, 162, 235, 0.6)'   // Azul
+        ],
+        borderColor: [
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(54, 162, 235, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      }
+    }
+  });
+
+  // --- 🥧 Gráfico de Pastel ---
+  const ctxPie = document.getElementById('graficoPastel').getContext('2d');
+  new Chart(ctxPie, {
+    type: 'pie',
+    data: {
+      labels: ['Activas', 'Finalizadas'],
+      datasets: [{
+        data: [totalActivas, totalFinalizadas],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)'
+        ],
+        borderColor: ['#fff', '#fff'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              return `${label}: ${value}`;
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
 </main>
 {% endblock %}

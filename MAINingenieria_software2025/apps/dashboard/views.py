@@ -10,7 +10,7 @@ import io
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.db.models import Sum, Avg, F, FloatField, ExpressionWrapper
+from django.db.models import Sum, Avg, Count, Q, F, FloatField, ExpressionWrapper
 from django.db.models.functions import ExtractYear
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -418,15 +418,28 @@ def analista_simulacion_historial(request):
 
 # HU10
 def home_coordinador(request):
-    query = request.GET.get('q', '')
+    query = request.GET.get("q")
     if query:
         iniciativas = Iniciativa.objects.filter(nombre__icontains=query)
     else:
         iniciativas = Iniciativa.objects.all()
 
+    # 🔢 Cálculo de métricas
+    total_activas = Iniciativa.objects.filter(avance__lt=100).count()
+    total_finalizadas = Iniciativa.objects.filter(avance=100).count()
+    avance_promedio = Iniciativa.objects.aggregate(avg=Avg('avance'))['avg'] or 0
+    emisiones_totales = Iniciativa.objects.aggregate(avg=Avg('reduccion_esperada'))['avg'] or 0
+
+    metricas = {
+        'total_activas': int(total_activas),
+        'total_finalizadas': int(total_finalizadas),
+        'avance_promedio': float(round(avance_promedio, 1)),
+        'emisiones_totales': float(round(emisiones_totales or 0, 2)),
+    }
+
     return render(request, 'dashboard/home_coordinador.html', {
         'iniciativas': iniciativas,
-        'query': query,
+        'metricas': metricas,
     })
 
 # HU10
