@@ -488,3 +488,18 @@ def comparar_reduccion(request):
 
     contexto = {'comparaciones': comparaciones}
     return render(request, 'dashboard/comparacion_reduccion.html', contexto)
+
+def home_gerente(request):
+    # Datos ficticios (podrías luego cargarlos desde una BD o API)
+    anios = [2020, 2021, 2022, 2023, 2024]
+    emisiones = [12500, 11800, 11000, 9500, 8800]  # toneladas de CO₂e
+
+    metricas = {
+        'anios': anios,
+        'emisiones': emisiones,
+    }
+
+    return render(request, 'dashboard/home_gerente.html', {
+        'metricas': metricas,
+    }
+    )

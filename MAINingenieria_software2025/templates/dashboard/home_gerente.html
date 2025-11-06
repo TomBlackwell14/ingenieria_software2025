@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<header class="topbar role-coordinador" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Gerente Sostenibilidad</p>
+    </div>
+  </div>
+
+    <nav class="nav-links">
+    <a href="#">Emisiones Historicas</a>
+    <a href="#">Simuladores</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<!-- HU08 VISUALIZACION EMISIONES HISTORICAS -->
+<main class="dashboard-analista container">
+{{ metricas|json_script:"metricas-data" }}
+    <section id="graficos" class="shadow-sm bg-white rounded">
+        <h2 class="mb-4 text-center">Emisiones históricas de GEI (últimos 5 años)</h2>
+        <canvas id="graficoEmisiones" height="120"></canvas>
+        <div class="text-center mt-4">
+            <p class="text-muted">Datos expresados en toneladas de CO₂ equivalente (tCO₂e).</p>
+            <a href="#" class="btn btn-success">
+            + Exportar a PDF
+            </a>
+        </div>
+    </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const metricas = JSON.parse(document.getElementById('metricas-data').textContent);
+
+  const anios = metricas.anios;
+  const emisiones = metricas.emisiones;
+
+  console.log('metricas cargadas:', metricas);
+
+  // --- 📊 Gráfico de Barras ---
+  const ctxBar = document.getElementById('graficoEmisiones').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: anios,
+      datasets: [{
+        label: 'Métricas',
+        data: emisiones,
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(153, 102, 255, 0.6)'
+        ],
+        borderColor: 'rgba(0, 0, 0, 0.2)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      }
+    }
+  });
+</script>
+</main>
+
+{% endblock %}
