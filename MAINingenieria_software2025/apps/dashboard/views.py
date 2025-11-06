@@ -451,7 +451,7 @@ def detalle_iniciativa(request, pk):
 class EditarIniciativaView(UpdateView):
     model = Iniciativa
     template_name = 'dashboard/editar_iniciativa.html'
-    fields = ['avance'] 
+    fields = ['avance', 'reduccion_real'] 
 
     def get_success_url(self):
         return reverse_lazy('dashboard:detalle_iniciativa', kwargs={'pk': self.object.pk})
@@ -468,3 +468,23 @@ class CrearIniciativaView(CreateView):
     template_name = 'dashboard/crear_iniciativa.html'
     fields = ['nombre', 'categoria', 'ubicacion', 'fecha_inicio', 'capex', 'opex', 'reduccion_esperada', 'avance', 'descripcion'] 
     success_url = reverse_lazy('dashboard:home_coordinador')
+
+# HU12
+def comparar_reduccion(request):
+    iniciativas = Iniciativa.objects.all()
+
+    comparaciones = []
+    for i in iniciativas:
+        if i.reduccion_esperada > 0:
+            diferencia_pct = ((i.reduccion_real - i.reduccion_esperada) / i.reduccion_esperada) * 100
+        else:
+            diferencia_pct = 0
+        comparaciones.append({
+            'nombre': i.nombre,
+            'esperada': i.reduccion_esperada,
+            'real': i.reduccion_real,
+            'diferencia': round(diferencia_pct, 2)
+        })
+
+    contexto = {'comparaciones': comparaciones}
+    return render(request, 'dashboard/comparacion_reduccion.html', contexto)

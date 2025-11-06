@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<header class="topbar role-coordinador" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Coordinador</p>
+    </div>
+  </div>
+
+    <nav class="nav-links">
+    <a href="{% url 'dashboard:home_coordinador' %}">Dashboard</a>
+    <a href="{% url 'dashboard:comparar_reduccion' %}">Comparativa</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<main class="dashboard-analista container">
+<section class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📊 Comparación: Reducción Esperada vs Real</h2>
+    <a href="#" class="btn btn-success">
+      + Exportar a PDF
+    </a>  
+    <a href="{% url 'dashboard:home_coordinador' %}" class="btn btn-secondary">⬅ Volver</a>
+</div>
+
+  <!-- 🧾 Tabla de comparación -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Iniciativa</th>
+          <th>Reducción Esperada (tCO₂e)</th>
+          <th>Reducción Real (tCO₂e)</th>
+          <th>Diferencia (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in comparaciones %}
+        <tr>
+          <td>{{ c.nombre }}</td>
+          <td>{{ c.esperada }}</td>
+          <td>{{ c.real }}</td>
+          <td>
+            {% if c.diferencia > 79 %}
+              <span class="text-success fw-bold">+{{ c.diferencia }}%</span>
+            {% elif c.diferencia < 80 %}
+              <span class="text-danger fw-bold">{{ c.diferencia }}%</span>
+            {% else %}
+              <span class="text-muted">0%</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted fst-italic">No hay datos</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+{% endblock %}

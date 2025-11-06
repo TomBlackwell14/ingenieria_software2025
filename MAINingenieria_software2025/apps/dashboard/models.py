@@ -149,6 +149,7 @@ class Iniciativa(models.Model):
     capex = models.FloatField(help_text="Costo inicial USD", blank=True, null=True)
     opex = models.FloatField(help_text="Costo anual USD", blank=True, null=True)
     reduccion_esperada = models.FloatField(help_text="tCO₂e evitadas", blank=True, null=True)
+    reduccion_real = models.FloatField(help_text="tCO₂e reales", default=0)
     avance = models.FloatField(help_text="Porcentaje completado", default=0)
     descripcion = models.TextField(blank=True)
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
