@@ -5,8 +5,8 @@
 
 {% block content %}
 <!-- =========================================================
-   HOME ANALISTA AMBIENTAL (CARGA MANUAL ESTILO OPERADOR + HU-06/07/03/04)
-   ========================================================= -->
+  HOME ANALISTA AMBIENTAL (CARGA MANUAL ESTILO OPERADOR + HU-06/07/03/04)
+  ========================================================= -->
 
 <header class="topbar role-analista" role="banner">
   <div class="brand">
@@ -41,138 +41,349 @@
     <div class="card kpi"><h4>Auditorías pendientes</h4><strong>{{ kpi_auditorias|default:"3" }}</strong></div>
   </section>
 
+{# ============================== #}
+{# CARGA MANUAL (DEMO MEJORADO)  #}
+{# ============================== #}
+<section id="carga-manual" class="card card--accent">
+  <header class="section-head">
+    <div class="head-left">
+      <h3>📥 Carga manual de consumos</h3>
+      <small><b>DEMO:</b> Calculo SIMULADO en cliente. El oficial se haria en servidor.</small>
+    </div>
+    <div class="head-right">
+      <span class="badge">HU-A1 · HU-A2</span>
+    </div>
+  </header>
+
+  <form id="form-carga-manual" class="grid form-grid operador-form" method="post" action="#">
+    {% csrf_token %}
+
+    <!-- PASO 1: CONTEXTO -->
+    <div class="fieldset">
+      <div class="fieldset__legend">1) Contexto</div>
+      <div class="fieldset__grid">
+        <div class="form-field">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" name="fecha" type="date" required>
+        </div>
+
+        {# PAIS Y UNIDAD DE NEGOCIO AUTO EN LA MISMA FILA #}
+        <div class="form-field">
+          <label for="pais">Pais</label>
+          <select id="pais" name="pais" required>
+            <option value="" selected disabled>Seleccione…</option>
+            <option value="CL">Chile</option>
+            <option value="AR">Argentina</option>
+            <option value="BR">Brasil</option>
+            <option value="PE">Peru</option>
+            <option value="CO">Colombia</option>
+            <option value="UY">Uruguay</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Unidad de negocio (auto)</label>
+          <input id="unidad_negocio_nombre" type="text" value="-" disabled>
+          <input id="unidad_negocio" name="unidad_negocio" type="hidden" value="">
+          <small class="muted">Se asigna automaticamente segun pais (DEMO).</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2: ALCANCE, FUENTE Y UNIDAD -->
+    <div class="fieldset">
+      <div class="fieldset__legend">2) Alcance y fuente</div>
+      <div class="fieldset__grid">
+        <div class="form-field">
+          <label for="alcance">Alcance</label>
+          <select id="alcance" name="alcance" required>
+            <option value="" selected disabled>Seleccione…</option>
+            <option value="1">Alcance 1</option>
+            <option value="2">Alcance 2</option>
+            <option value="3">Alcance 3</option>
+          </select>
+          <small class="muted">Cambia opciones segun alcance.</small>
+        </div>
+
+        <div class="form-field">
+          <label for="tipo_consumo">Tipo de consumo</label>
+          <select id="tipo_consumo" name="tipo_consumo" required>
+            <option value="" selected disabled>Seleccione…</option>
+            {# SE RELLENA DINAMICAMENTE SEGUN ALCANCE #}
+          </select>
+        </div>
+
+        <div class="form-field only-combustible" hidden>
+          <label for="tipo_combustible">Tipo de combustible</label>
+          <select id="tipo_combustible" name="tipo_combustible">
+            <option value="" selected disabled>Seleccione…</option>
+            {# OPCIONES CAMBIAN CON ALCANCE=1 Y TIPO=COMBUSTIBLE #}
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="unidad">Unidad</label>
+          <select id="unidad" name="unidad" required>
+            <option value="" selected disabled>Seleccione…</option>
+            {# UNIDADES SUGERIDAS SEGUN FUENTE/ALCANCE #}
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="cantidad">Cantidad</label>
+          <input id="cantidad" name="cantidad" type="number" min="0" step="0.0001" placeholder="0.0000" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3: PREVIEW GHG -->
+    <div class="fieldset">
+      <div class="fieldset__legend">3) Vista previa GHG (SIMULADO)</div>
+      <div class="fieldset__grid preview-grid">
+        <div class="form-field">
+          <label>Factor de emision (preview)</label>
+          <input id="factor_preview" type="text" value="-" disabled>
+          <small class="muted">tCO2e por unidad (segun pais y fuente).</small>
+        </div>
+        <div class="form-field">
+          <label>tCO2e (preview)</label>
+          <input id="tco2e_preview" type="text" value="-" disabled>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="form-actions">
+      <button id="btn-guardar-demo" type="submit" class="btn btn--primary">Guardar registro (DEMO)</button>
+      <button type="reset" class="btn btn--ghost">Limpiar</button>
+    </div>
+
+    <div id="toast-demo" class="toast" hidden>✅ Registro creado (SIMULADO).</div>
+  </form>
+</section>
+
+<style>
+/* ESTILOS MINIMOS DE APOYO DEMO */
+.toast{background:#eaf7f1;border:1px solid #cfe9dc;padding:8px 12px;border-radius:8px;margin-top:8px;color:#1b7f52;}
+</style>
+
+<script>
+/* ============================================================
+  COMENTARIOS EN MAYUSCULAS Y SIN TILDES
+  LOGICA DEMO: SIN PERSISTENCIA, SOLO PREVIEW Y TOAST
+   ============================================================ */
+
+/* MAPEO DEMO DE UNIDAD DE NEGOCIO POR PAIS (NOMBRE + ID) */
+const DEFAULT_UN = {
+  CL: { id: "CL-01", nombre: "Sede Santiago" },
+  AR: { id: "AR-01", nombre: "Sede Buenos Aires" },
+  BR: { id: "BR-01", nombre: "Sede Sao Paulo" },
+  PE: { id: "PE-01", nombre: "Sede Lima" },
+  CO: { id: "CO-01", nombre: "Sede Bogota" },
+  UY: { id: "UY-01", nombre: "Sede Montevideo" },
+};
+
+/* FACTORES DEMO EN tCO2e POR UNIDAD (APROX) */
+const FX_DEMO = {
+  /* ALCANCE 1: COMBUSTIBLES (FACTORES POR UNIDAD) */
+  combustible: {
+    diesel:   { l: 0.00268, kg: 0.00316, m3: 2.68 }, // DEMO
+    gasolina: { l: 0.00231, kg: 0.00300, m3: 2.31 }, // DEMO
+    gnl:      { kg: 0.00275, m3: 0.00190 },          // DEMO
+    glp:      { kg: 0.00300, l: 0.00150 },           // DEMO
+  },
+  /* ALCANCE 2: ELECTRICIDAD POR PAIS (tCO2e/kWh) */
+  electricidad: {
+    CL: { kwh: 0.000393 }, // DEMO: ~0.393 t/MWh
+    AR: { kwh: 0.000400 },
+    BR: { kwh: 0.000100 },
+    PE: { kwh: 0.000300 },
+    CO: { kwh: 0.000250 },
+    UY: { kwh: 0.000200 },
+  },
+  /* ALCANCE 3: GENERICO DEMO (POR DEFECTO 1.0 tCO2e/UNIDAD SI KG) */
+  alcance3: {
+    kg: 1.0
+  }
+};
+
+/* OPCIONES DEPENDIENTES POR ALCANCE (DEMO) */
+const OPTIONS = {
+  alcance1: {
+    tipoConsumo: [
+      {v:"combustible", t:"Combustible"},
+      {v:"refrigerantes", t:"Refrigerantes"}
+    ],
+    combustibles: [
+      {v:"diesel", t:"Diesel"},
+      {v:"gasolina", t:"Gasolina"},
+      {v:"gnl", t:"GNL"},
+      {v:"glp", t:"GLP"},
+    ],
+    unidades: ["l","kg","m3"]
+  },
+  alcance2: {
+    tipoConsumo: [
+      {v:"electricidad", t:"Electricidad"}
+    ],
+    combustibles: [],
+    unidades: ["kwh"]
+  },
+  alcance3: {
+    tipoConsumo: [
+      {v:"otros", t:"Otros (Alcance 3)"}
+    ],
+    combustibles: [],
+    unidades: ["kg"]
+  }
+};
+
+/* GETTERS DE ELEMENTOS */
+const $alcance    = document.getElementById('alcance');
+const $pais       = document.getElementById('pais');
+const $unNombre   = document.getElementById('unidad_negocio_nombre');
+const $unHidden   = document.getElementById('unidad_negocio');
+const $tipoCons   = document.getElementById('tipo_consumo');
+const $tipoComb   = document.getElementById('tipo_combustible');
+const $unidad     = document.getElementById('unidad');
+const $cantidad   = document.getElementById('cantidad');
+const $fxPrev     = document.getElementById('factor_preview');
+const $tPrev      = document.getElementById('tco2e_preview');
+const $onlyComb   = document.querySelector('.only-combustible');
+const $form       = document.getElementById('form-carga-manual');
+const $toast      = document.getElementById('toast-demo');
+
+/* ASIGNAR UNIDAD DE NEGOCIO AUTOMATICA SEGUN PAIS */
+function setUNPorPais(){
+  const p = $pais.value;
+  const un = DEFAULT_UN[p];
+  if (un){
+    $unNombre.value = un.nombre;
+    $unHidden.value = un.id;
+  } else {
+    $unNombre.value = "-";
+    $unHidden.value = "";
+  }
+}
+
+/* RELLENAR SELECTS SEGUN ALCANCE */
+function refreshPorAlcance(){
+  const a = $alcance.value;
+  let conf = null;
+  if (a === "1") conf = OPTIONS.alcance1;
+  else if (a === "2") conf = OPTIONS.alcance2;
+  else if (a === "3") conf = OPTIONS.alcance3;
+
+  // TIPOS DE CONSUMO
+  $tipoCons.innerHTML = '<option value="" selected disabled>Seleccione…</option>';
+  (conf?.tipoConsumo || []).forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.t;
+    $tipoCons.appendChild(opt);
+  });
+
+  // COMBUSTIBLES
+  $onlyComb.hidden = !(a === "1");
+  $tipoComb.innerHTML = '<option value="" selected disabled>Seleccione…</option>';
+  (conf?.combustibles || []).forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.t;
+    $tipoComb.appendChild(opt);
+  });
+
+  // UNIDADES
+  $unidad.innerHTML = '<option value="" selected disabled>Seleccione…</option>';
+  (conf?.unidades || []).forEach(u=>{
+    const opt = document.createElement('option');
+    opt.value = u; opt.textContent = u.toUpperCase();
+    $unidad.appendChild(opt);
+  });
+
+  calcPreview();
+}
+
+/* OBTENER FACTOR DEMO */
+function getFactor(){
+  const a  = $alcance.value;
+  const pa = $pais.value;
+  const tc = $tipoCons.value;
+  const u  = ($unidad.value||'').toLowerCase();
+  if (!a || !tc || !u) return null;
+
+  // ALCANCE 1 - COMBUSTIBLES O REFRIGERANTES
+  if (a === "1"){
+    if (tc === "combustible"){
+      const t = $tipoComb.value || "diesel";
+      const tbl = (FX_DEMO.combustible[t]||{});
+      return tbl[u] || null;
+    }
+    if (tc === "refrigerantes"){
+      // DEMO: 1.0 tCO2e POR KG
+      return (u === "kg") ? 1.0 : null;
+    }
+  }
+
+  // ALCANCE 2 - ELECTRICIDAD POR PAIS
+  if (a === "2" && tc === "electricidad"){
+    const tbl = FX_DEMO.electricidad[pa] || {};
+    return tbl[u] || null;
+  }
+
+  // ALCANCE 3 - GENERICO
+  if (a === "3"){
+    const v = FX_DEMO.alcance3[u];
+    return v || null;
+  }
+
+  return null;
+}
+
+/* CALCULAR PREVIEW */
+function calcPreview(){
+  const f = getFactor();
+  const v = parseFloat($cantidad.value || "0") || 0;
+  if (f && v >= 0){
+    $fxPrev.value = f.toFixed(6) + ' tCO2e/' + ($unidad.value || '-');
+    const t = v * f;
+    $tPrev.value  = t.toFixed(3) + ' tCO2e';
+  } else {
+    $fxPrev.value = '-';
+    $tPrev.value  = '-';
+  }
+}
+
+/* TOAST DEMO */
+function showToast(msg){
+  $toast.textContent = msg || '✅ Operacion simulada.';
+  $toast.hidden = false;
+  setTimeout(()=>{ $toast.hidden = true; }, 1800);
+}
+
+/* EVENTOS */
+$pais?.addEventListener('change', ()=>{ setUNPorPais(); calcPreview(); });
+$alcance?.addEventListener('change', ()=>{ refreshPorAlcance(); });
+$tipoCons?.addEventListener('change', calcPreview);
+$tipoComb?.addEventListener('change', calcPreview);
+$unidad?.addEventListener('change', calcPreview);
+$cantidad?.addEventListener('input', calcPreview);
+
+/* INTERCEPTAR SUBMIT PARA DEMO */
+$form?.addEventListener('submit', (e)=>{
+  e.preventDefault(); // DEMO: NO ENVIA
+  calcPreview();
+  showToast('✅ Registro creado (SIMULADO).');
+});
+
+/* INIT */
+setUNPorPais();
+refreshPorAlcance();
+calcPreview();
+</script>
+
+
   <!-- =========================================================
-       CARGA MANUAL (ESTILO OPERADOR) + PRESET GHG (PREVIEW)
-       ========================================================= -->
-  <section id="carga-manual" class="card card--accent">
-    <header class="section-head">
-      <div class="head-left">
-        <h3>📥 Carga manual de consumos</h3>
-        <small>Preset GHG (preview). El cálculo <b>oficial</b> se confirma en servidor por año/país/fuente.</small>
-      </div>
-      <div class="head-right">
-        <span class="badge">HU-02 · HU-07</span>
-      </div>
-    </header>
-
-    <form class="grid form-grid operador-form" method="post" action="{% url 'dashboard:analista_registro_manual' %}">
-      {% csrf_token %}
-
-      <!-- PASO 1: CONTEXTO -->
-      <div class="fieldset">
-        <div class="fieldset__legend">1) Contexto</div>
-        <div class="fieldset__grid">
-          <div class="form-field">
-            <label for="fecha">Fecha</label>
-            <input id="fecha" name="fecha" type="date" required>
-          </div>
-          <div class="form-field">
-            <label for="pais">País</label>
-            <select id="pais" name="pais" required>
-              <option value="" selected disabled>Seleccione…</option>
-              <option value="CL">Chile</option>
-              <option value="AR">Argentina</option>
-              <option value="BR">Brasil</option>
-              <option value="PE">Perú</option>
-              <option value="CO">Colombia</option>
-              <option value="UY">Uruguay</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="unidad_negocio">Unidad de negocio</label>
-            <select id="unidad_negocio" name="unidad_negocio" required>
-              <option value="" selected disabled>Seleccione…</option>
-              {% for u in unidades_negocio %}
-                <option value="{{ u.id }}">{{ u.nombre }}</option>
-              {% empty %}
-                <option value="default">General</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- PASO 2: FUENTE Y UNIDAD -->
-      <div class="fieldset">
-        <div class="fieldset__legend">2) Fuente y unidad</div>
-        <div class="fieldset__grid">
-          <div class="form-field">
-            <label for="tipo_consumo">Tipo de consumo</label>
-            <select id="tipo_consumo" name="tipo_consumo" required>
-              <option value="" selected disabled>Seleccione…</option>
-              <option value="combustible">Combustible (Alcance 1)</option>
-              <option value="electricidad">Electricidad (Alcance 2)</option>
-              <option value="refrigerantes">Refrigerantes (Alcance 1)</option>
-            </select>
-            <small class="muted">Preset GHG. El valor exacto lo calculará el servidor (HU-07).</small>
-          </div>
-
-          <div class="form-field only-combustible" hidden>
-            <label for="tipo_combustible">Tipo de combustible</label>
-            <select id="tipo_combustible" name="tipo_combustible">
-              <option value="" selected disabled>Seleccione…</option>
-              <option value="diesel">Diésel (EN590)</option>
-              <option value="gasolina">Gasolina</option>
-              <option value="gnl">GNL</option>
-              <option value="glp">GLP</option>
-            </select>
-          </div>
-
-          <div class="form-field only-electricidad" hidden>
-            <label for="factor_region">Factor de red</label>
-            <select id="factor_region" name="factor_region">
-              <option value="" selected disabled>Seleccione…</option>
-              <option value="cl_sic">Chile – SIC/SEN</option>
-              <option value="ar_grid">Argentina – Red</option>
-              <option value="br_grid">Brasil – Red</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="unidad">Unidad</label>
-            <select id="unidad" name="unidad" required>
-              <option value="" selected disabled>Seleccione…</option>
-              <option value="l">Litros (L)</option>
-              <option value="kg">Kilogramos (kg)</option>
-              <option value="m3">Metros cúbicos (m³)</option>
-              <option value="kwh">kWh</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="cantidad">Cantidad</label>
-            <input id="cantidad" name="cantidad" type="number" min="0" step="0.0001" placeholder="0.0000" required>
-          </div>
-        </div>
-      </div>
-
-      <!-- PASO 3: PREVIEW GHG -->
-      <div class="fieldset">
-        <div class="fieldset__legend">3) Vista previa GHG</div>
-        <div class="fieldset__grid preview-grid">
-          <div class="form-field">
-            <label>Factor de emisión (preview)</label>
-            <input id="factor_preview" type="text" value="-" disabled>
-            <small class="muted">tCO₂e por unidad. El servidor confirmará el factor oficial.</small>
-          </div>
-          <div class="form-field">
-            <label>tCO₂e (preview)</label>
-            <input id="tco2e_preview" type="text" value="-" disabled>
-          </div>
-        </div>
-      </div>
-
-      <!-- ACCIONES -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn--primary">Guardar registro</button>
-        <button type="reset" class="btn btn--ghost">Limpiar</button>
-      </div>
-    </form>
-  </section>
-
-  <!-- =========================================================
-       HU-06: IMPORTAR EXCEL
-       ========================================================= -->
+    HU-06: IMPORTAR EXCEL
+    ========================================================= -->
   <section id="importacion" class="card">
     <header class="section-head">
       <div class="head-left">
@@ -201,8 +412,8 @@
   </section>
 
   <!-- =========================================================
-       HU-03: INVENTARIO CONSOLIDADO
-       ========================================================= -->
+      HU-03: INVENTARIO CONSOLIDADO
+      ========================================================= -->
   <section id="inventario" class="card">
     <header class="section-head"><div class="head-left"><h3>📚 Inventario consolidado GEI</h3><small>Filtros por año, alcance, fuente, unidad de negocio</small></div><div class="head-right"><span class="badge">HU-03</span></div></header>
 
@@ -274,8 +485,8 @@
   </section>
 
   <!-- =========================================================
-       HU-04: EXPORTAR
-       ========================================================= -->
+      HU-04: EXPORTAR
+      ========================================================= -->
   <section id="exportar" class="card">
     <header class="section-head"><div class="head-left"><h3>⤵️ Exportar inventario</h3><small>Archivos para auditoría o análisis externo</small></div><div class="head-right"><span class="badge">HU-04</span></div></header>
     <div class="btn-row">
@@ -286,70 +497,14 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       SIMULACIÓN POLÍTICAS PÚBLICAS
-       ========================================================= -->
-  <section id="simulacion" class="card">
-    <header class="section-head">
-      <div class="head-left"><h3>🧪 Simulación de políticas públicas</h3><small>Aplicar límites, impuestos al carbono o metas de reducción</small></div>
-      <div class="head-right"><span class="badge">Escenarios</span></div>
-    </header>
 
-    <form class="grid form-grid" method="post" action="{% url 'dashboard:analista_simulacion' %}">
-      {% csrf_token %}
-      <div class="form-field">
-        <label for="anio_base">Año base</label>
-        <select id="anio_base" name="anio_base" required>
-          {% for y in anios %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="form-field">
-        <label for="tipo_politica">Tipo de política</label>
-        <select id="tipo_politica" name="tipo_politica" required>
-          <option value="" disabled selected>Seleccione…</option>
-          <option value="limite">Límite de emisiones (tCO2e)</option>
-          <option value="impuesto">Impuesto al carbono (USD/tCO2e)</option>
-          <option value="meta_reduccion">% reducción vs año base</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label for="valor_politica">Valor</label>
-        <input id="valor_politica" name="valor_politica" type="number" min="0" step="0.01" placeholder="0.00" required>
-      </div>
-      <div class="form-field">
-        <label for="ambito">Ámbito</label>
-        <select id="ambito" name="ambito" required>
-          <option value="total">Total compañía</option>
-          <option value="alcance1">Solo alcance 1</option>
-          <option value="alcance2">Solo alcance 2</option>
-          <option value="alcance3">Solo alcance 3</option>
-          <option value="por_unidad">Por unidad de negocio</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn--primary" type="submit">Simular</button>
-        <a class="btn btn--ghost" href="{% url 'dashboard:analista_simulacion_historial' %}">Ver escenarios previos</a>
-      </div>
-    </form>
 
-    {% if simulacion %}
-    <div class="sim-result">
-      <h4>Resultado (preview)</h4>
-      <ul>
-        <li>Emisiones base: <strong>{{ simulacion.base_tco2e }}</strong> tCO2e</li>
-        <li>Emisiones simuladas: <strong>{{ simulacion.sim_tco2e }}</strong> tCO2e</li>
-        <li>Diferencia: <strong>{{ simulacion.delta_tco2e }}</strong> tCO2e</li>
-        {% if simulacion.costo_est %}<li>Costo estimado: <strong>USD {{ simulacion.costo_est }}</strong></li>{% endif %}
-      </ul>
-    </div>
-    {% endif %}
-  </section>
 
 </main>
 
 <!-- =========================================================
-     ESTILOS LIGEROS (LOOK “OPERADOR”)
-     ========================================================= -->
+ESTILOS LIGEROS (LOOK “OPERADOR”)
+  ========================================================= -->
 <style>
 .dashboard-analista .overview { display:grid; grid-template-columns:repeat(4,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
 .dashboard-analista .kpi strong { font-size:1.4rem; }
@@ -376,8 +531,8 @@ tbody td { padding:10px; border-bottom:1px solid #eef1f3; }
 </style>
 
 <!-- =========================================================
-     JS PREVIEW GHG (CLIENTE). EL OFICIAL VA EN SERVIDOR (HU-07).
-     ========================================================= -->
+    JS PREVIEW GHG (CLIENTE). EL OFICIAL VA EN SERVIDOR (HU-07).
+  ========================================================= -->
 <script>
 const FX = {
   combustible: {

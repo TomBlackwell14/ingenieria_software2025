@@ -67,24 +67,25 @@
   </section>
 
   <!-- =========================================================
-       PROGRESO HACIA LA META
+       PROGRESO HACIA LA META (SIN TEMPLATE EN INLINE CSS)
        ========================================================= -->
   <section id="indicadores" class="chart-card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
     <h3 style="margin:.2rem 0 0 0;">Progreso hacia la meta</h3>
     {% with pct=kpis.avance_meta_pct|default:0 %}
-    {% if pct|floatformat != "0" %}
-      <div style="position:relative;height:16px;background:#eef2f3;border-radius:999px;overflow:hidden;margin-top:1rem;">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:{{ pct }}%;background:var(--color-accent);"></div>
-      </div>
-      <p style="color:#444;font-size:.9rem;margin-top:.5rem;">Avance: {{ pct }}%</p>
-    {% else %}
-      <div style="padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;margin-top:.5rem;">Sin datos para mostrar</div>
-    {% endif %}
+      {% if pct|floatformat != "0" %}
+        <div class="progress" style="position:relative;height:16px;background:#eef2f3;border-radius:999px;overflow:hidden;margin-top:1rem;">
+          <!-- USO DE DATA ATR Y JS PARA EVITAR LLAVES EN CSS INLINE -->
+          <div class="progress__bar" data-pct="{{ pct }}" style="position:absolute;left:0;top:0;bottom:0;background:var(--color-accent);width:0;"></div>
+        </div>
+        <p style="color:#444;font-size:.9rem;margin-top:.5rem;">Avance: {{ pct }}%</p>
+      {% else %}
+        <div style="padding:.8rem;border:1px dashed var(--borde);border-radius:10px;color:#666;margin-top:.5rem;">Sin datos para mostrar</div>
+      {% endif %}
     {% endwith %}
   </section>
 
   <!-- =========================================================
-       TENDENCIA HISTÓRICA
+       TENDENCIA HISTORICA
        ========================================================= -->
   <section class="chart-card" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
     <h3 style="margin:.2rem 0 0 0;">Tendencia de emisiones 2015–2025</h3>
@@ -135,16 +136,14 @@
   </section>
 
   <!-- =========================================================
-       ALERTAS
+       ALERTAS (SIN ESTILO INLINE CON LLAVES)
        ========================================================= -->
   <section aria-label="Alertas" style="background:#fff;border-radius:12px;box-shadow:var(--shadow-light);padding:1.1rem;">
     <h3 style="margin:.2rem 0 0 0;">Alertas</h3>
     {% if alertas %}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem;margin-top:.75rem;">
         {% for a in alertas %}
-        <article class="alert" style="border-left:6px solid
-          {% if a.nivel == 'rojo' %}#d14343{% elif a.nivel == 'amarillo' %}#e7b416{% else %}#2e7d32{% endif %};
-          background:#fff;border:1px solid var(--borde);border-radius:10px;padding:.8rem;">
+        <article class="alert alert--{{ a.nivel|default:'verde' }}" style="background:#fff;border:1px solid var(--borde);border-radius:10px;padding:.8rem;">
           <strong>{{ a.titulo }}</strong>
           <p style="margin:0;color:#555;">{{ a.descripcion }}</p>
         </article>
@@ -159,4 +158,29 @@
     <small>© 2025 Cencosud Gases Free — Dirección Ambiental Global</small>
   </footer>
 </main>
+
+<!-- =========================================================
+     ESTILOS AUXILIARES SIN TEMPLATING EN CSS
+     ========================================================= -->
+<style>
+  /* PROGRESS BAR COLOR SEGUN DISEÑO */
+  .alert { border-left: 6px solid #2e7d32; }
+  .alert--rojo { border-left-color: #d14343; }
+  .alert--amarillo { border-left-color: #e7b416; }
+  .alert--verde { border-left-color: #2e7d32; }
+</style>
+
+<!-- =========================================================
+  JS MINIMO PARA EVITAR {% templatetag openvariable %}{% templatetag closevariable %} EN CSS INLINE
+  ========================================================= -->
+<script>
+  // ESTO LEE data-pct Y AJUSTA EL ANCHO, EVITANDO LLAVES DE DJANGO EN CSS
+  document.querySelectorAll('.progress__bar').forEach(function(el){
+    var v = parseFloat(el.getAttribute('data-pct') || '0');
+    if (!isNaN(v) && v >= 0) {
+      if (v > 100) v = 100;
+      el.style.width = v + '%';
+    }
+  });
+</script>
 {% endblock %}

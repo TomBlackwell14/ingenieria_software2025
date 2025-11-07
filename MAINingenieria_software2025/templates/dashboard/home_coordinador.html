@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
-{% block page_class %}dashboard-analista{% endblock %}
+{% block page_class %}dashboard-coordinador{% endblock %}
 
 {% block content %}
 
@@ -10,46 +10,513 @@
     <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
     <div class="brand-text">
       <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
-      <p class="brand-text__tagline">Panel del Coordinadooooooooor</p>
+      <p class="brand-text__tagline">Panel del Coordinador de Proyectos</p>
     </div>
   </div>
 
-  <nav class="nav-links">
-    <a href="#">Registrar Iniciativa</a>
-    <a href="#">Ver Iniciativas</a>
+  <nav class="nav-links" aria-label="Acciones rapidas">
+    <a href="#form-nueva" class="anchor">Registrar Iniciativa</a>
+    <a href="#tabla-inits" class="anchor">Ver Iniciativas</a>
   </nav>
 
   <div class="actions">
     <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
-    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesion</a>
   </div>
 </header>
 
-<main class="dashboard-analista container">
-<section id="inventario" class="card">
-  <h1>Lista de Iniciativas</h1>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Categoría</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for i in iniciativas %}
-        <tr>
-          <td>{{ i.nombre }}</td>
-          <td>{{ i.categoria }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="2" class="empty">Sin resultados</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
+<main class="container coordinator-grid">
+
+  <!-- KPIS ARRIBA (HU-C2) -->
+  <section class="card kpi-row" aria-label="Indicadores clave">
+    <div class="kpi" title="TOTAL DE INICIATIVAS REGISTRADAS">
+      <strong id="kpi-total">0</strong><span>Total iniciativas</span>
+    </div>
+    <div class="kpi" title="INICIATIVAS EN ESTADO ACTIVA">
+      <strong id="kpi-activas">0</strong><span>Activas</span>
+    </div>
+    <div class="kpi" title="INICIATIVAS FINALIZADAS">
+      <strong id="kpi-completadas">0</strong><span>Completadas</span>
+    </div>
+    <div class="kpi" title="SUMA PONDERADA DE TCO2E ESPERADA">
+      <strong id="kpi-exp">0</strong><span>tCO2e esperada</span>
+    </div>
+    <div class="kpi" title="SUMA PONDERADA DE TCO2E REAL">
+      <strong id="kpi-real">0</strong><span>tCO2e real</span>
+    </div>
+    <div class="kpi" title="PORCENTAJE DE CUMPLIMIENTO AGREGADO (REAL/ESPERADA)">
+      <strong id="kpi-cumpl">0%</strong><span>% cumplimiento</span>
+    </div>
+  </section>
+
+  <!-- FORMULARIO NUEVA INICIATIVA (HU-C1) -->
+  <section class="card form-card" id="form-nueva" aria-label="Registrar nueva iniciativa">
+    <h3>Registrar Nueva Iniciativa</h3>
+
+    <form id="newInitiativeForm" autocomplete="off" novalidate>
+      <div class="row">
+        <label>Nombre
+          <input id="in_nombre" type="text" required placeholder="Ej: Paneles solares Centro X" aria-required="true">
+        </label>
+        <label>Tipo
+          <select id="in_tipo">
+            <option value="Operacion">Operacion</option>
+            <option value="Energia">Energia</option>
+            <option value="Movilidad">Movilidad</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Fecha de Inicio
+          <input id="in_fecha" type="date" required aria-required="true">
+        </label>
+        <label>Estado
+          <select id="in_estado">
+            <option value="Activa">Activa</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Completada">Completada</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>tCO2e Esperada
+          <input id="in_esperada" type="number" min="0" step="0.1" required aria-required="true" placeholder="Ej: 1200">
+        </label>
+        <label>tCO2e Real
+          <input id="in_real" type="number" min="0" step="0.1" value="0" placeholder="Ej: 350">
+        </label>
+      </div>
+
+      <div class="row actions">
+        <button type="submit" class="btn btn--save">💾 Guardar (DEMO)</button>
+        <button type="button" id="clearForm" class="btn btn--ghost">Limpiar</button>
+      </div>
+
+      <small class="res-small">Los datos se guardan localmente en el navegador (DEMO).</small>
+    </form>
+  </section>
+
+  <!-- GRAFICO COMPARACION (HU-C3) -->
+  <section class="card chart-card" aria-label="Grafico comparativo">
+    <div class="chart-head">
+      <h3>Comparacion esperada vs real por iniciativa</h3>
+      <div class="chart-filters">
+        <label class="inline">Estado
+          <select id="chart_estado">
+            <option value="all">Todos</option>
+            <option>Activa</option>
+            <option>Pendiente</option>
+            <option>Completada</option>
+          </select>
+        </label>
+        <label class="inline">Tipo
+          <select id="chart_tipo">
+            <option value="all">Todos</option>
+            <option>Operacion</option>
+            <option>Energia</option>
+            <option>Movilidad</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <canvas id="chartIniciativas" height="160" aria-label="Grafico de barras"></canvas>
+  </section>
+
+  <!-- FILTROS Y TABLA DE INICIATIVAS -->
+  <section class="card table-card" id="tabla-inits" aria-label="Tabla de iniciativas">
+    <div class="table-top">
+      <div class="filters">
+        <label>Estado
+          <select id="filter_estado">
+            <option value="all">Todos</option>
+            <option>Activa</option>
+            <option>Pendiente</option>
+            <option>Completada</option>
+          </select>
+        </label>
+        <label>Tipo
+          <select id="filter_tipo">
+            <option value="all">Todos</option>
+            <option>Operacion</option>
+            <option>Energia</option>
+            <option>Movilidad</option>
+          </select>
+        </label>
+        <button id="resetFilters" class="btn btn--ghost">Reset filtros</button>
+      </div>
+      <div class="table-actions">
+        <button id="exportMock" class="btn">Exportar (CSV)</button>
+      </div>
+    </div>
+
+    <div class="table-wrap" role="region" aria-label="Listado de iniciativas con desplazamiento">
+      <table id="initiativesTable">
+        <thead>
+          <tr>
+            <th data-sort="nombre">Nombre ▲▼</th>
+            <th data-sort="tipo">Tipo ▲▼</th>
+            <th data-sort="fecha">Inicio ▲▼</th>
+            <th data-sort="estado">Estado ▲▼</th>
+            <th data-sort="esperada">Esperada ▲▼</th>
+            <th data-sort="real">Real ▲▼</th>
+            <th data-sort="delta">Delta ▲▼</th>
+            <th data-sort="progreso">% / Barra</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-foot">
+      <small class="res-small">TIP: CLICK EN LOS ENCABEZADOS PARA ORDENAR.</small>
+    </div>
+  </section>
+
+  <footer class="footer"><small>© 2025 Cencosud Gases Free — Coordinacion (DEMO)</small></footer>
+
 </main>
 
+<!-- ESTILOS LOCALES -->
+<style>
+/* COLOR DE ACENTO PARA COORDINADOR (OPCIONAL) */
+.role-coordinador { --color-accent:#1B7F52; }
+
+/* LAYOUT PRINCIPAL */
+.coordinator-grid{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:18px;
+  max-width:1200px;
+  margin:20px auto;
+  align-items:start;        /* EVITA ESTIRAMIENTO VERTICAL */
+}
+
+/* KPIS: APILADOS Y CON LA MISMA ALTURA; EL BLOQUE SE ESTIRA COMO EL FORM */
+.kpi-row{
+  /* SE ESTIRA PARA IGUALAR LA ALTURA DE LA FILA (MISMA QUE EL FORM) */
+  align-self: stretch;
+  height: 100%;
+
+  /* APILADO VERTICAL */
+  display: grid;
+  grid-template-columns: 1fr;   /* UNA COLUMNA (IZQ) */
+  grid-auto-rows: 1fr;          /* TODAS LAS TARJETAS = MISMA ALTURA */
+  gap: 10px;
+}
+
+.kpi{
+  background:#f6faf7;
+  border:1px solid #e4efe6;
+  border-radius:8px;
+  padding:10px;
+  text-align:center;
+
+  /* CENTRAR CONTENIDO EN CADA KPI */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.kpi strong{display:block;font-size:1.1rem;color:var(--color-accent)}
+.kpi span{font-size:.85rem;display:block;margin-top:2px}
+
+/* RESPONSIVE: EN MOVIL 2 COLUMNAS Y ALTURA NATURAL */
+@media (max-width:900px){
+  .kpi-row{
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: auto; /* altura natural en pantallas pequeñas */
+  }
+}
+
+/* FORM */
+.form-card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+.form-card h3 { margin-bottom:12px; color:#1B7F52; }
+.form-card .row{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}
+.form-card label{flex:1;display:flex;flex-direction:column;font-size:.95rem;color:#333}
+.form-card input,.form-card select{margin-top:4px;padding:6px 8px;border:1px solid #ccd5d9;border-radius:6px;font-size:.95rem}
+.form-card input:focus,.form-card select:focus{border-color:#1B7F52;outline:none;box-shadow:0 0 0 2px rgba(27,127,82,0.15)}
+
+/* BOTONES GENERALES */
+.btn{padding:.45rem .7rem;border-radius:6px;border:1px solid transparent;background:#fff;cursor:pointer;font-weight:600}
+.btn--primary{background:var(--color-accent);color:#fff}
+.btn--ghost{background:transparent;border:1px solid #dfe7ee}
+
+/* BOTON GUARDAR SIN ANIMACION NI CAMBIO DE COLOR */
+.btn--save{background:#1B7F52;color:#fff;border-color:#166646;transition:none}
+.btn--save:hover,.btn--save:active,.btn--save:focus{background:#1B7F52;border-color:#166646}
+
+/* TABLA */
+.table-card{grid-column:1/3}
+.table-wrap{overflow:auto;max-height:520px;border:1px solid #eef2f3;border-radius:8px}
+table{width:100%;border-collapse:collapse}
+thead th{position:sticky;top:0;background:#fff;z-index:1;border-bottom:2px solid #e6edf2}
+th,td{padding:8px;border-bottom:1px solid #eef2f3;text-align:left;vertical-align:middle}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.8rem}
+.badge.activa{background:#e6f7ef;color:#146c43;border:1px solid #bde3cf}
+.badge.pendiente{background:#fff7e6;color:#8a6d1a;border:1px solid #f3deb3}
+.badge.completada{background:#e6f0ff;color:#2848b8;border:1px solid #c6d4ff}
+.progress{height:8px;background:#eef2f3;border-radius:999px;overflow:hidden}
+.progress__bar{height:100%;background:var(--color-accent);width:0;transition:width .25s}
+.delta-pos{color:#1b7f52;font-weight:600}
+.delta-neg{color:#b42318;font-weight:600}
+.delta-zero{color:#667085}
+
+/* CHART */
+.chart-card{grid-column:1/2}
+.inline{display:inline-block;margin-left:8px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+
+/* RESPONSIVE */
+@media (max-width:900px){
+  .coordinator-grid{grid-template-columns:1fr;padding:12px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .chart-card{order:3}
+  .table-wrap{max-height:none}
+}
+
+/* TOAST */
+.toast{position:fixed;right:18px;bottom:18px;background:#1b7f52;color:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12);opacity:0;transform:translateY(12px);transition:all .28s}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+
+<!-- LIBRERIA GRAFICO -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- LOGICA JS -->
+<script>
+// COMENTARIOS EN MAYUS Y SIN TILDES
+
+// DATOS MOCK
+const MOCK_INITS = [
+  {id:1,nombre:'Mejora eficiencia planta A',tipo:'Operacion',fecha:'2024-03-15',estado:'Activa',esperada:1200,real:980},
+  {id:2,nombre:'Paneles solares sucursal X',tipo:'Energia',fecha:'2023-09-01',estado:'Completada',esperada:500,real:510},
+  {id:3,nombre:'Optimizar flota distribucion',tipo:'Movilidad',fecha:'2024-06-10',estado:'Activa',esperada:300,real:0},
+  {id:4,nombre:'Reciclaje y gestion residuos',tipo:'Operacion',fecha:'2022-11-20',estado:'Completada',esperada:150,real:140}
+];
+
+// PERSISTENCIA
+const STORAGE_KEY = 'cs_initiatives_v2';
+let initiatives = (function(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length>0) return parsed;
+    }
+  }catch(e){}
+  return MOCK_INITS.slice();
+})();
+let nextId = initiatives.reduce((m,i)=> Math.max(m, Number(i.id||0)), 0) + 1;
+function saveToStorage(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(initiatives)); }catch(e){} }
+
+// DOM
+const tbody = document.querySelector('#initiativesTable tbody');
+const filterEstado = document.getElementById('filter_estado');
+const filterTipo = document.getElementById('filter_tipo');
+const chartEstado = document.getElementById('chart_estado');
+const chartTipo = document.getElementById('chart_tipo');
+
+// TOAST
+function showToast(msg){
+  let t = document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); },2000);
+}
+
+// KPIS
+function computeKpis(){
+  const total = initiatives.length;
+  const activas = initiatives.filter(i=>i.estado==='Activa').length;
+  const completas = initiatives.filter(i=>i.estado==='Completada').length;
+  const sumEsper = initiatives.reduce((s,i)=>s + Number(i.esperada||0),0);
+  const sumReal  = initiatives.reduce((s,i)=>s + Number(i.real||0),0);
+  const pct = sumEsper ? Math.round((sumReal / sumEsper) * 100) : 0;
+
+  setText('kpi-total', total);
+  setText('kpi-activas', activas);
+  setText('kpi-completadas', completas);
+  setText('kpi-exp', num(sumEsper));
+  setText('kpi-real', num(sumReal));
+  setText('kpi-cumpl', pct + '%');
+}
+function setText(id, value){ document.getElementById(id).textContent = value; }
+function num(n){ return Number(n||0).toLocaleString(); }
+function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+// TABLA
+let sortKey = null;
+let sortDir = 1;
+function applyFilters(data, fe, ft){ return data.filter(i => (fe==='all'||i.estado===fe) && (ft==='all'||i.tipo===ft)); }
+function sortData(data){
+  if(!sortKey) return data;
+  return data.slice().sort((a,b)=>{
+    let va, vb;
+    if(sortKey==='delta'){ va=(Number(a.real||0)-Number(a.esperada||0)); vb=(Number(b.real||0)-Number(b.esperada||0)); }
+    else if(sortKey==='progreso'){
+      va = a.esperada ? (Number(a.real||0)/Number(a.esperada))*100 : 0;
+      vb = b.esperada ? (Number(b.real||0)/Number(b.esperada))*100 : 0;
+    } else { va=a[sortKey]; vb=b[sortKey]; }
+    if(typeof va==='string'){ va=va.toLowerCase(); vb=String(vb).toLowerCase(); }
+    if(va<vb) return -1*sortDir; if(va>vb) return 1*sortDir; return 0;
+  });
+}
+function badgeEstado(estado){
+  const cls = estado==='Activa' ? 'activa' : (estado==='Pendiente' ? 'pendiente' : 'completada');
+  return `<span class="badge ${cls}">${escapeHtml(estado)}</span>`;
+}
+function renderTable(){
+  tbody.innerHTML='';
+  const fe = filterEstado.value;
+  const ft = filterTipo.value;
+  let data = sortData(applyFilters(initiatives, fe, ft));
+  if(data.length===0){ tbody.innerHTML='<tr><td colspan="9" class="empty">Sin iniciativas</td></tr>'; return; }
+  data.forEach(i=>{
+    const delta = (Number(i.real||0) - Number(i.esperada||0));
+    const progreso = i.esperada ? Math.round((Number(i.real||0)/Number(i.esperada))*100) : 0;
+    const deltaCls = delta>0 ? 'delta-pos' : (delta<0 ? 'delta-neg' : 'delta-zero');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(i.nombre)}</td>
+      <td>${escapeHtml(i.tipo)}</td>
+      <td>${escapeHtml(i.fecha)}</td>
+      <td>${badgeEstado(i.estado)}</td>
+      <td>${num(i.esperada)}</td>
+      <td>${num(i.real)}</td>
+      <td class="${deltaCls}">${delta.toFixed(1)}</td>
+      <td>
+        <div class="progress" title="${progreso}%">
+          <div class="progress__bar" style="width:${Math.max(0,Math.min(100,progreso))}%"></div>
+        </div>
+        <small>${progreso}%</small>
+      </td>
+      <td>
+        <button class="btn btn--ghost" data-action="complete" data-id="${i.id}">Completar</button>
+        <button class="btn btn--ghost" data-action="edit" data-id="${i.id}">Editar</button>
+        <button class="btn btn--ghost" data-action="dup" data-id="${i.id}">Duplicar</button>
+        <button class="btn" data-action="delete" data-id="${i.id}">Eliminar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// CHART
+const ctx = document.getElementById('chartIniciativas').getContext('2d');
+let chart = new Chart(ctx, {
+  type:'bar',
+  data:{labels:[],datasets:[
+    {label:'Esperada', backgroundColor:'#9aa6b2', data:[]},
+    {label:'Real', backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--color-accent')||'#2e7d32', data:[]}
+  ]},
+  options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{title:{display:true,text:'tCO2e'}}}}
+});
+function getChartData(){
+  const fe = chartEstado.value, ft = chartTipo.value;
+  const data = applyFilters(initiatives, fe, ft);
+  return { labels:data.map(d=>d.nombre), exp:data.map(d=>Number(d.esperada||0)), real:data.map(d=>Number(d.real||0)) };
+}
+function updateChart(){
+  const {labels, exp, real} = getChartData();
+  chart.data.labels = labels; chart.data.datasets[0].data = exp; chart.data.datasets[1].data = real; chart.update();
+}
+
+// CRUD
+document.getElementById('newInitiativeForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const nombre = document.getElementById('in_nombre').value.trim();
+  const tipo = document.getElementById('in_tipo').value;
+  const fecha = document.getElementById('in_fecha').value || new Date().toISOString().slice(0,10);
+  const estado = document.getElementById('in_estado').value;
+  const esperada = Math.max(0, parseFloat(document.getElementById('in_esperada').value) || 0);
+  let real = Math.max(0, parseFloat(document.getElementById('in_real').value) || 0);
+  if(estado==='Completada' && real===0 && esperada>0) real = esperada;
+
+  const nuevo = { id: nextId++, nombre: nombre || 'Sin nombre', tipo, fecha, estado, esperada, real };
+  initiatives.unshift(nuevo);
+  saveToStorage(); computeKpis(); renderTable(); updateChart(); showToast('Creado (DEMO)');
+  this.reset(); document.getElementById('in_fecha').value = new Date().toISOString().slice(0,10);
+});
+
+tbody.addEventListener('click', function(e){
+  const btn = e.target.closest('button'); if(!btn) return;
+  const action = btn.dataset.action; const id = Number(btn.dataset.id);
+  const it = initiatives.find(x=>x.id===id); if(!it) return;
+
+  if(action==='complete'){
+    it.estado = 'Completada';
+    if(Number(it.real||0)===0 && Number(it.esperada||0)>0) it.real = it.esperada;
+    saveToStorage(); computeKpis(); renderTable(); updateChart(); showToast('Marcado como completado');
+  } else if(action==='delete'){
+    if(confirm('¿Eliminar iniciativa? Esta accion no se puede deshacer.')){
+      initiatives = initiatives.filter(x=>x.id!==id);
+      saveToStorage(); computeKpis(); renderTable(); updateChart(); showToast('Eliminado');
+    }
+  } else if(action==='edit'){
+    const nombre = prompt('Nombre:', it.nombre); if(nombre===null) return;
+    const tipo = prompt('Tipo (Operacion/Energia/Movilidad):', it.tipo); if(tipo===null) return;
+    const fecha = prompt('Fecha (YYYY-MM-DD):', it.fecha); if(fecha===null) return;
+    const estado = prompt('Estado (Activa/Pendiente/Completada):', it.estado); if(estado===null) return;
+    const esperada = Number(prompt('tCO2e esperada:', it.esperada)); if(Number.isNaN(esperada)) return;
+    const real = Number(prompt('tCO2e real:', it.real)); if(Number.isNaN(real)) return;
+
+    it.nombre = nombre.trim() || it.nombre;
+    if(['Operacion','Energia','Movilidad'].includes(tipo)) it.tipo = tipo;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(fecha)) it.fecha = fecha;
+    if(['Activa','Pendiente','Completada'].includes(estado)) it.estado = estado;
+    it.esperada = Math.max(0, esperada);
+    it.real = Math.max(0, real);
+
+    saveToStorage(); computeKpis(); renderTable(); updateChart(); showToast('Editado');
+  } else if(action==='dup'){
+    const copy = {...it, id: nextId++, nombre: it.nombre + ' (Copia)'};
+    initiatives.unshift(copy);
+    saveToStorage(); computeKpis(); renderTable(); updateChart(); showToast('Duplicado');
+  }
+});
+
+// FILTROS
+[filterEstado, filterTipo].forEach(el=>el.addEventListener('change', ()=> renderTable()));
+document.getElementById('resetFilters').addEventListener('click', ()=>{ filterEstado.value='all'; filterTipo.value='all'; renderTable(); });
+[chartEstado, chartTipo].forEach(el=>el.addEventListener('change', ()=> updateChart()));
+
+// EXPORT Y LIMPIAR
+document.getElementById('exportMock').addEventListener('click', ()=>{
+  const rows = ['Nombre,Tipo,Inicio,Estado,Esperada,Real'];
+  initiatives.forEach(i=> rows.push([i.nombre,i.tipo,i.fecha,i.estado,i.esperada,i.real].join(',')));
+  const blob = new Blob([rows.join('\n')],{type:'text/csv'});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='iniciativas_demo.csv'; a.click(); URL.revokeObjectURL(url);
+});
+document.getElementById('clearForm').addEventListener('click', ()=>{
+  const f = document.getElementById('newInitiativeForm'); f.reset();
+  document.getElementById('in_fecha').value = new Date().toISOString().slice(0,10);
+});
+
+// ORDEN TABLA
+document.querySelectorAll('#initiativesTable thead th[data-sort]').forEach(th=>{
+  th.style.cursor='pointer';
+  th.addEventListener('click', ()=>{
+    const key = th.getAttribute('data-sort');
+    if(sortKey===key){ sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+    renderTable();
+  });
+});
+
+// INIT
+(function init(){
+  const f = document.getElementById('in_fecha');
+  if(f && !f.value) f.value = new Date().toISOString().slice(0,10);
+  computeKpis(); renderTable(); updateChart();
+})();
+
+// ANCLAS SUAVES
+document.querySelectorAll('a.anchor').forEach(a=>{
+  a.addEventListener('click', (e)=>{
+    const href = a.getAttribute('href');
+    if(href && href.startsWith('#')){ e.preventDefault(); document.querySelector(href)?.scrollIntoView({behavior:'smooth'}); }
+  });
+});
+</script>
 
 {% endblock %}

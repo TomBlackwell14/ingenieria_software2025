@@ -7,6 +7,7 @@ urlpatterns = [
     # === DASHBOARDS POR ROL ===
     path("analista/",  views.home_analista,  name="home_analista"),
     path("director/",  views.home_director,  name="home_director"),
+    path("gerente/",    views.home_gerente,   name="home_gerente"),
     path("operador/",  views.home_operador,  name="home_operador"),
     path("ciudadano/", views.home_ciudadano, name="home_ciudadano"),
     path("coordinador/", views.home_coordinador, name="home_coordinador"),

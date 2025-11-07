@@ -419,3 +419,28 @@ def analista_simulacion_historial(request):
 def home_coordinador(request):
     iniciativas = Iniciativa.objects.all()
     return render(request, "dashboard/home_coordinador.html", {"iniciativas": iniciativas})
+
+
+@login_required
+def home_gerente(request):
+    """
+    Panel del gerente: entrega series históricas de emisiones para el gráfico.
+    Si no hay datos en BD, se devuelven valores por defecto (simulados).
+    """
+    try:
+        emisions_qs = Emision.objects.annotate(
+            tco2e=ExpressionWrapper(F('consumo') * F('factor_emision'), output_field=FloatField()),
+            anio=ExtractYear('fecha'),
+        )
+        serie = (emisions_qs.values('anio').order_by('anio').annotate(total=Sum('tco2e')))
+        anios = [int(x['anio']) for x in serie]
+        emisiones = [round((x['total'] or 0.0), 1) for x in serie]
+    except Exception:
+        anios = [2016,2017,2018,2019,2020,2021,2022,2023,2024]
+        emisiones = [72000,70000,69000,68000,66000,64000,62000,60000,58000]
+
+    context = {
+        'anios': anios,
+        'emisiones': emisiones,
+    }
+    return render(request, 'dashboard/home_gerente.html', context)

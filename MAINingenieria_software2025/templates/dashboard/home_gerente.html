@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Gerente · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-gerente{% endblock %}
+
+{% block content %}
+<header class="topbar role-gerente">
+  <div class="brand">
+    <div class="brand__logo">📊</div>
+      <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel Gerente de Sostenibilidad</p>
+    </div>
+  </div>
+  <nav class="nav-links">
+    <a href="#historico">Historico</a>
+    <a href="#simulacion">Simulacion</a>
+    <a href="#politicas">Politicas</a>
+  </nav>
+  <div class="actions"><a class="btn" href="{% url 'role_login' %}">Salir</a></div>
+</header>
+
+<main class="container gerente-grid">
+
+  <!-- ============================
+       HU-G1: GRAFICO HISTORICO
+       ============================ -->
+  <section id="historico" class="card">
+    <header class="section-head">
+      <div>
+        <h2>Emisiones historicas</h2>
+  <small class="muted">Unidad: tCO2e · Vista ilustrativa</small>
+      </div>
+      <div class="controls">
+        <label class="ctrl">
+          <span>Tipo</span>
+          <select id="chartType">
+            <option value="line" selected>Linea</option>
+            <option value="bar">Barras</option>
+          </select>
+        </label>
+        <label class="ctrl">
+          <span>Alcance</span>
+          <select id="alcanceFiltro">
+            <option value="total" selected>Total</option>
+            <option value="alcance1">Alcance 1</option>
+            <option value="alcance2">Alcance 2</option>
+            <option value="alcance3">Alcance 3</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <div class="chart-wrap">
+      <canvas id="chartEmisiones" width="900" height="360" aria-label="Grafico de emisiones historicas"></canvas>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><strong id="kpi-total">—</strong><span>Total serie</span></div>
+      <div class="kpi"><strong id="kpi-ultimo">—</strong><span>Ultimo año</span></div>
+      <div class="kpi">
+        <strong id="kpi-variacion">—</strong>
+        <span>Variacion vs. anterior</span>
+      </div>
+      <div class="kpi"><strong id="kpi-trend">—</strong><span>Tendencia</span></div>
+    </div>
+  </section>
+
+  <!-- ======================================
+       HU-G2 + HU-G3: SIMULACION DE ESCENARIOS
+       ====================================== -->
+  <section id="simulacion" class="card">
+    <header class="section-head">
+      <div>
+        <h2>Simulacion de transicion energetica</h2>
+        <small class="muted">Aplica reducciones y politicas publicas para ver impacto</small>
+      </div>
+      <div class="legend-sim">
+        <span class="dot base"></span> Base
+        <span class="dot esc"></span> Escenario
+      </div>
+    </header>
+
+    <div class="sim-grid">
+      <!-- CONTROLES PRINCIPALES -->
+      <form id="simForm" class="sim-form" autocomplete="off">
+        <!-- REDUCCION DE ELECTRICIDAD -->
+        <div class="form-row">
+          <label for="reduccion_elect">Reduccion consumo electrico (%)</label>
+          <div class="range">
+            <input id="reduccion_elect" type="range" min="0" max="100" step="0.5" value="0">
+            <input id="reduccion_elect_num" type="number" min="0" max="100" step="0.5" value="0">
+          </div>
+          <small class="help">Disminuye las emisiones de alcance 2.</small>
+        </div>
+
+        <!-- CAMBIO DE COMBUSTIBLE -->
+        <div class="form-row">
+          <label for="cambio_combustible">Cambio de combustible (% reduccion emisiones)</label>
+          <div class="range">
+            <input id="cambio_combustible" type="range" min="0" max="100" step="0.5" value="0">
+            <input id="cambio_combustible_num" type="number" min="0" max="100" step="0.5" value="0">
+          </div>
+          <small class="help">Afecta principalmente alcance 1.</small>
+        </div>
+
+        <!-- POLITICAS PUBLICAS -->
+        <div class="form-row">
+          <label for="politica_select">Politica publica</label>
+          <select id="politica_select">
+            <option value="none" data-tax="0" data-limit="0">Ninguna</option>
+            <option value="carbon_tax" data-tax="10" data-limit="0">Impuesto al carbono USD 10/tCO2e</option>
+            <option value="cap_limit" data-tax="0" data-limit="50000">Limite anual 50.000 tCO2e</option>
+          </select>
+          <small class="help">Puedes combinar reducciones con impuesto o limite.</small>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="actions">
+          <button type="button" id="runSim" class="btn btn--primary">Ejecutar simulacion</button>
+          <button type="button" id="resetSim" class="btn btn--ghost">Restablecer</button>
+        </div>
+
+        <!-- ASUNCIONES DEMO -->
+        <details class="assumptions">
+          <summary>Ver supuestos</summary>
+          <ul>
+            <li>Serie base = datos agregados por año.</li>
+            <li>Reducciones se aplican multiplicativamente.</li>
+            <li>Impuesto al carbono no cambia tCO2e, solo costo estimado.</li>
+            <li>Limite aplica recorte si el escenario excede el tope anual.</li>
+          </ul>
+        </details>
+      </form>
+
+      <!-- RESULTADOS -->
+      <div class="sim-results">
+        <div class="res-card">
+          <h4>Base (ultimo año)</h4>
+          <p class="res-big" id="baseValor">— tCO2e</p>
+        </div>
+        <div class="res-card">
+          <h4>Escenario</h4>
+          <p class="res-big" id="escValor">— tCO2e</p>
+        </div>
+        <div class="res-card delta">
+          <h4>Diferencia</h4>
+          <p class="res-big" id="deltaValor">— tCO2e</p>
+          <small id="deltaPct" class="muted">— %</small>
+        </div>
+        <div class="res-card cost">
+          <h4>Costo estimado (impuesto)</h4>
+          <p class="res-big" id="costValor">— USD</p>
+          <small class="muted">Aplica solo si hay impuesto</small>
+        </div>
+        <div class="badge-wrap">
+          <span id="badgeTrend" class="trend-badge">—</span>
+          <span id="badgeCap" class="cap-badge" hidden>CAP aplicado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRAFICO DE COMPARACION RAPIDA -->
+    <div class="chart-wrap small">
+      <canvas id="chartComparacion" height="140"></canvas>
+    </div>
+  </section>
+
+  <!-- ======================
+       CONTEXTO DE POLITICAS
+       ====================== -->
+  <section id="politicas" class="card">
+    <h3>Notas sobre politicas</h3>
+    <ul class="notes">
+      <li><strong>Impuesto al carbono:</strong> no reduce tCO2e por si solo, pero agrega un costo proporcional a las emisiones.</li>
+      <li><strong>Limite anual (cap):</strong> si el escenario supera el tope, se recorta al limite indicado.</li>
+      <li><strong>Transicion energetica:</strong> la combinacion de reduccion electrica y cambio de combustible impacta de manera multiplicativa.</li>
+    </ul>
+  </section>
+
+  <footer class="footer"><small>© 2025 Cencosud Gases Free — Panel Gerente (DEMO)</small></footer>
+</main>
+
+<!-- ==============
+     ESTILOS LOCALES
+     ============== -->
+<style>
+.gerente-grid{max-width:1100px;margin:24px auto;display:grid;gap:20px}
+.card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e7eaee;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+.ctrl{display:flex;align-items:center;gap:6px;font-size:.9rem}
+.badge-demo{background:#fff3cd;border:1px solid #ffe69c;border-radius:999px;padding:2px 8px;font-size:.75rem;color:#8a6d3b}
+
+.chart-wrap{overflow:auto;border:1px dashed #e7eaee;border-radius:10px;padding:10px;background:#fbfcfd}
+.chart-wrap.small{margin-top:10px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px;margin-top:12px}
+.kpi{background:#f6faf7;border:1px solid #e4efe6;border-radius:10px;padding:10px;text-align:center}
+.kpi strong{display:block;font-size:1.25rem;color:var(--color-accent)}
+
+.sim-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.sim-form .form-row{display:flex;flex-direction:column;margin-top:10px}
+.sim-form label{font-size:.95rem;color:#333;margin-bottom:6px}
+.range{display:grid;grid-template-columns:1fr 90px;gap:8px}
+.range input[type="number"]{text-align:right}
+.help{color:#6a6a6a;font-size:.8rem}
+.actions{display:flex;gap:8px;margin-top:12px}
+.assumptions{margin-top:10px;position:relative;padding:6px;border-radius:6px}
+.assumptions summary{cursor:pointer}
+.assumptions[open]{padding-left:14px}
+.assumptions ul{margin:8px 0 0 18px;color:#4a4a4a;max-width:calc(100% - 18px);overflow-wrap:break-word}
+
+.sim-results{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px}
+.sim-results .res-card{background:#f7f9fc;border:1px solid #e5eaf3;border-radius:10px;padding:12px;text-align:center}
+.res-big{font-size:1.3rem;margin:2px 0 0 0}
+.delta .res-big{font-weight:700}
+.cost .res-big{color:#1b7f52}
+
+.legend-sim{display:flex;align-items:center;gap:14px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.dot.base{background:#9aa6b2}
+.dot.esc{background:var(--color-accent)}
+
+.badge-wrap{grid-column:1/-1;display:flex;gap:8px;justify-content:center;margin-top:2px}
+.trend-badge{padding:4px 10px;border-radius:999px;font-size:.85rem;border:1px solid #dfe7f1;background:#eef5fb;color:#2b6cb0}
+.cap-badge{padding:4px 10px;border-radius:999px;font-size:.85rem;border:1px solid #dfe7f1;background:#fff1f1;color:#a61b1b}
+
+.notes{margin:6px 0 0 18px;color:#4a4a4a}
+.footer{text-align:center;color:#777;margin-top:12px}
+
+@media (max-width:980px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .sim-grid{grid-template-columns:1fr}
+}
+</style>
+
+<!-- =================
+     LIBRERIAS GRAFICO
+     ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ==========================
+     JS DEMO (SIN PERSISTENCIA)
+     COMENTARIOS EN MAYUSC Y SIN TILDES
+     ========================== -->
+<script>
+// DATOS MOCK POR ALCANCE (tCO2e)
+const DATA = {
+  anios:  [2017,2018,2019,2020,2021,2022,2023,2024],
+  total:  [70000,69000,68000,66000,64000,62000,60000,58000],
+  alcance1:[38000,37200,36500,35400,34500,33600,32800,32000],
+  alcance2:[25000,24600,24200,23200,22400,21600,20600,19600],
+  alcance3:[7000, 7200, 7300, 7400, 7100, 6800, 6600, 6400]
+};
+
+// UTILIDAD: SUMA ARRAYS ELEMENTO A ELEMENTO
+function sumArrays(a,b){return a.map((v,i)=>v+(b[i]||0));}
+
+// GRAFICO PRINCIPAL (HISTORICO)
+const ctxHist = document.getElementById('chartEmisiones').getContext('2d');
+let chartTypeSel = document.getElementById('chartType').value;
+let serieActual = DATA.total.slice();
+let chartHist = new Chart(ctxHist, {
+  type: chartTypeSel,
+  data: {
+    labels: DATA.anios,
+    datasets: [{
+      label: 'tCO2e',
+      data: serieActual,
+      borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-accent') || '#2e7d32',
+      backgroundColor: 'rgba(46,125,50,0.08)',
+      tension: 0.25,
+      fill: true,
+      pointRadius: 3,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Año' } },
+      y: { title: { display: true, text: 'tCO2e' }, beginAtZero: false }
+    }
+  }
+});
+
+// KPIS INICIALES
+function setKpis(serie){
+  const tot = serie.reduce((a,b)=>a+b,0);
+  document.getElementById('kpi-total').textContent   = tot.toLocaleString();
+  document.getElementById('kpi-ultimo').textContent  = serie[serie.length-1].toLocaleString();
+  const prev = serie[serie.length-2] || serie[serie.length-1];
+  const vari = ((serie[serie.length-1]-prev)/prev)*100;
+  document.getElementById('kpi-variacion').textContent = (vari>=0? '+' : '') + vari.toFixed(1) + '%';
+  document.getElementById('kpi-trend').textContent = (vari<0? 'Bajando' : vari>0? 'Subiendo' : 'Estable');
+}
+setKpis(serieActual);
+
+// CAMBIO TIPO DE CHART
+document.getElementById('chartType').addEventListener('change', (e)=>{
+  chartHist.config.type = e.target.value;
+  chartHist.update();
+});
+
+// FILTRO POR ALCANCE
+document.getElementById('alcanceFiltro').addEventListener('change', (e)=>{
+  const v = e.target.value;
+  if(v === 'total') serieActual = DATA.total.slice();
+  else if (v === 'alcance1') serieActual = DATA.alcance1.slice();
+  else if (v === 'alcance2') serieActual = DATA.alcance2.slice();
+  else if (v === 'alcance3') serieActual = DATA.alcance3.slice();
+  chartHist.data.datasets[0].data = serieActual;
+  chartHist.update();
+  setKpis(serieActual);
+});
+
+// SINCRONIZACION RANGO/NUMERO
+const rEl = document.getElementById('reduccion_elect');
+const nEl = document.getElementById('reduccion_elect_num');
+const rComb = document.getElementById('cambio_combustible');
+const nComb = document.getElementById('cambio_combustible_num');
+[rEl,nEl].forEach(el=>el.addEventListener('input', ()=>{ nEl.value=rEl.value; rEl.value=nEl.value; }));
+[rComb,nComb].forEach(el=>el.addEventListener('input', ()=>{ nComb.value=rComb.value; rComb.value=nComb.value; }));
+
+// GRAFICO COMPARACION BASE VS ESCENARIO
+const ctxComp = document.getElementById('chartComparacion').getContext('2d');
+let chartComp = new Chart(ctxComp, {
+  type: 'bar',
+  data: {
+    labels: ['Base (ultimo año)','Escenario'],
+    datasets: [{
+      label: 'tCO2e',
+      data: [0,0],
+      backgroundColor: ['#9aa6b2', getComputedStyle(document.documentElement).getPropertyValue('--color-accent') || '#2e7d32']
+    }]
+  },
+  options: {
+    responsive:true,
+    plugins:{ legend:{display:false} },
+    scales:{ y:{ beginAtZero:true, title:{display:true,text:'tCO2e'} } }
+  }
+});
+
+// EJECUTAR SIMULACION (HU-G2 + HU-G3)
+document.getElementById('runSim').addEventListener('click', runSimulation);
+document.getElementById('resetSim').addEventListener('click', resetSim);
+
+function runSimulation(){
+  // BASE DEL ULTIMO AÑO: POR DEFECTO USAMOS TOTAL
+  const base = DATA.total[DATA.total.length-1];
+
+  // REDUCCIONES
+  const redEl  = parseFloat(rEl.value)||0;    // AFECTA ALCANCE 2
+  const redCb  = parseFloat(rComb.value)||0;  // AFECTA ALCANCE 1
+
+  // SEPARAMOS COMPONENTES DEL ULTIMO AÑO
+  const a1 = DATA.alcance1[DATA.alcance1.length-1];
+  const a2 = DATA.alcance2[DATA.alcance2.length-1];
+  const a3 = DATA.alcance3[DATA.alcance3.length-1];
+
+  // APLICAMOS REDUCCIONES MULTIPLICATIVAS SOBRE A1 Y A2
+  let escA1 = a1 * (1 - redCb/100);
+  let escA2 = a2 * (1 - redEl/100);
+  let escA3 = a3; // SIN CAMBIO EN ESTE DEMO
+
+  let escenario = escA1 + escA2 + escA3;
+
+  // POLITICA PUBLICA (HU-G3)
+  const pol = document.getElementById('politica_select');
+  const tax = parseFloat(pol.selectedOptions[0].dataset.tax)||0;    // USD/TCO2E
+  const limit = parseFloat(pol.selectedOptions[0].dataset.limit)||0; // CAP EN TCO2E
+
+  // APLICO LIMITE (CAP)
+  let capApplied = false;
+  if (limit > 0 && escenario > limit){
+    escenario = limit;
+    capApplied = true;
+  }
+
+  // COSTO POR IMPUESTO (NO CAMBIA TCO2E)
+  const cost = tax > 0 ? Math.round(escenario * tax) : 0;
+
+  // PINTAMOS RESULTADOS
+  document.getElementById('baseValor').textContent = base.toLocaleString() + ' tCO2e';
+  document.getElementById('escValor').textContent  = Math.round(escenario).toLocaleString() + ' tCO2e';
+
+  const delta = Math.round(escenario - base);
+  const deltaPct = (delta / base) * 100;
+  document.getElementById('deltaValor').textContent = (delta>=0? '+' : '') + delta.toLocaleString() + ' tCO2e';
+  document.getElementById('deltaPct').textContent   = (deltaPct>=0? '+' : '') + deltaPct.toFixed(1) + '%';
+  document.getElementById('costValor').textContent  = cost ? ('USD ' + cost.toLocaleString()) : '— USD';
+
+  // BADGES
+  const badgeTrend = document.getElementById('badgeTrend');
+  badgeTrend.textContent = (delta<0? 'Mejora (menor tCO2e)' : delta>0? 'Peor (mayor tCO2e)' : 'Sin cambio');
+  badgeTrend.style.background = (delta<0? '#eaf7f1' : delta>0? '#fff1f1' : '#eef5fb');
+  badgeTrend.style.color = (delta<0? '#1b7f52' : delta>0? '#a61b1b' : '#2b6cb0');
+
+  const badgeCap = document.getElementById('badgeCap');
+  badgeCap.hidden = !capApplied;
+
+  // ACTUALIZO GRAFICO HISTORICO CON PUNTO PROYECTADO
+  const nextYear = DATA.anios[DATA.anios.length-1] + 1;
+  chartHist.data.labels = DATA.anios.concat(nextYear);
+  chartHist.data.datasets[0].data = DATA.total.concat(Math.round(escenario));
+  chartHist.update();
+
+  // GRAFICO BARRAS COMPARACION
+  chartComp.data.datasets[0].data = [base, Math.round(escenario)];
+  chartComp.update();
+}
+
+function resetSim(){
+  // RESETEO CONTROLES
+  rEl.value = nEl.value = 0;
+  rComb.value = nComb.value = 0;
+  document.getElementById('politica_select').value = 'none';
+
+  // RESETEO RESULTADOS
+  document.getElementById('baseValor').textContent = '— tCO2e';
+  document.getElementById('escValor').textContent  = '— tCO2e';
+  document.getElementById('deltaValor').textContent = '— tCO2e';
+  document.getElementById('deltaPct').textContent   = '— %';
+  document.getElementById('costValor').textContent  = '— USD';
+  document.getElementById('badgeTrend').textContent = '—';
+  document.getElementById('badgeTrend').style.background = '#eef5fb';
+  document.getElementById('badgeTrend').style.color = '#2b6cb0';
+  document.getElementById('badgeCap').hidden = true;
+
+  // RESTAURAR GRAFICO HISTORICO
+  chartHist.data.labels = DATA.anios.slice();
+  chartHist.data.datasets[0].data = DATA.total.slice();
+  chartHist.update();
+
+  // LIMPIAR COMPARACION
+  chartComp.data.datasets[0].data = [0,0];
+  chartComp.update();
+}
+</script>
+
+{% endblock %}
