@@ -15,6 +15,7 @@
 
     <nav class="nav-links">
     <a href="#">Emisiones Historicas</a>
+    <a href="{% url 'dashboard:progreso_carbono_neutralidad' %}">Progreso</a>
     <a href="#">Simuladores</a>
   </nav>
 
@@ -47,7 +48,7 @@
 
   console.log('metricas cargadas:', metricas);
 
-  // --- 📊 Gráfico de Barras ---
+  // --- Gráfico de Barras HU08 ---
   const ctxBar = document.getElementById('graficoEmisiones').getContext('2d');
   new Chart(ctxBar, {
     type: 'bar',

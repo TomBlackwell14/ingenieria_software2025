@@ -490,9 +490,8 @@ def comparar_reduccion(request):
     return render(request, 'dashboard/comparacion_reduccion.html', contexto)
 
 def home_gerente(request):
-    # Datos ficticios (podrías luego cargarlos desde una BD o API)
     anios = [2020, 2021, 2022, 2023, 2024]
-    emisiones = [12500, 11800, 11000, 9500, 8800]  # toneladas de CO₂e
+    emisiones = [12500, 11800, 11000, 9500, 8800] 
 
     metricas = {
         'anios': anios,
@@ -501,5 +500,20 @@ def home_gerente(request):
 
     return render(request, 'dashboard/home_gerente.html', {
         'metricas': metricas,
+    })
+
+def progreso_carbono_neutralidad(request):
+    meta_total = 10000  
+    reduccion_lograda = Iniciativa.objects.aggregate(total=Sum('reduccion_real'))['total'] or 0
+    porcentaje_avance = (reduccion_lograda / meta_total) * 100 if meta_total > 0 else 0
+    reduccion_restante = max(meta_total - reduccion_lograda, 0)
+
+    metricas = {
+        'meta_total': meta_total,
+        'reduccion_lograda': round(reduccion_lograda, 2),
+        'reduccion_restante': round(reduccion_restante, 2),
+        'porcentaje_avance': round(porcentaje_avance, 1),
     }
-    )
+    return render(request, 'dashboard/progreso_carbono_neutralidad.html', {
+        'metricas': metricas,
+    })

@@ -32,4 +32,7 @@ urlpatterns = [
     path('coordinador/nueva/',                     views.CrearIniciativaView.as_view(),    name='crear_iniciativa'),
     path('coordinador/comparacion/',               views.comparar_reduccion,               name='comparar_reduccion'),
 
+    # === GERENTE ===
+    path("gerente/progreso-carbono-neutralidad/", views.progreso_carbono_neutralidad, name="progreso_carbono_neutralidad"),
+
 ]
