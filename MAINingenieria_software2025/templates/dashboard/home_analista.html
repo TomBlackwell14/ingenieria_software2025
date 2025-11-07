@@ -492,7 +492,7 @@ calcPreview();
     <div class="btn-row">
       <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'csv' %}?{{ request.GET.urlencode }}">CSV</a>
       <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'xlsx' %}?{{ request.GET.urlencode }}">XLSX</a>
-      <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'json' %}?{{ request.GET.urlencode }}">JSON</a>
+      <a class="btn btn--ghost" href="{% url 'dashboard:analista_exportar' 'pdf' %}?{{ request.GET.urlencode }}">PDF</a>
       <a class="btn btn--primary" href="{% url 'dashboard:analista_bitacora' %}">Ver bitácora</a>
     </div>
   </section>

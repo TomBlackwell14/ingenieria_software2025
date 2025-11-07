@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<section class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <h1 class="text-center mb-4">{{ iniciativa.nombre }}</h1>
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>Categoria</th>
+        <td>{{ iniciativa.categoria }}</td>
+      </tr>
+      <tr>
+        <th>Ubicacion</th>
+        <td>{{ iniciativa.ubicacion }}</td>
+      </tr>
+      <tr>
+        <th>Capex</th>
+        <td>{{ iniciativa.capex }}</td>
+      </tr>
+      <tr>
+        <th>Opex</th>
+        <td>{{ iniciativa.opex }}</td>
+      </tr>
+      <tr>
+        <th>Reduccion</th>
+        <td>{{ iniciativa.reduccion_esperada }}</td>
+      </tr>
+      <tr>
+        <th>Avance</th>
+        <td>{{ iniciativa.avance }}</td>
+      </tr>
+      <tr>
+        <th>Descripcion</th>
+        <td>{{ iniciativa.descripcion }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'dashboard:home_coordinador' %}" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'dashboard:editar_iniciativa' iniciativa.id %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'dashboard:eliminar_iniciativa' iniciativa.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta iniciativa?');">
+        Eliminar
+    </a>
+  </div>
+</section>
+{% endblock %}

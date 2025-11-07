@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<header class="topbar role-coordinador" role="banner">
+  <div class="brand">
+    <a class="brand__logo" href="#" aria-label="Ir al inicio"><span class="logo">📊</span></a>
+    <div class="brand-text">
+      <h1 class="brand-text__title">Cencosud <span style="color:var(--color-accent)">Gases Free</span></h1>
+      <p class="brand-text__tagline">Panel del Gerente Sostenibilidad</p>
+    </div>
+  </div>
+
+<nav class="nav-links">
+    <a href="{% url 'dashboard:home_gerente' %}">Emisiones Historicas</a>
+    <a href="{% url 'dashboard:progreso_carbono_neutralidad' %}">Progreso</a>
+    <a href="#">Simuladores</a>
+  </nav>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{% url 'role_login' %}">Cambiar rol</a>
+    <a class="btn btn--primary" href="{% url 'role_login' %}">Cerrar sesión</a>
+  </div>
+</header>
+
+<main class="dashboard-analista container">
+<section id="carbono" class="card shadow-sm p-4 mb-5 bg-white rounded text-center">
+  <h2 class="mb-4">Progreso hacia la Carbono Neutralidad</h2>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="p-3 border rounded bg-light">
+        <h5 class="text-secondary">Meta Total</h5>
+        <p class="fs-4 fw-bold">{{ metricas.meta_total }} tCO₂e</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 border rounded bg-light">
+        <h5 class="text-success">Reducción Lograda</h5>
+        <p class="fs-4 fw-bold">{{ metricas.reduccion_lograda }} tCO₂e</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 border rounded bg-light">
+        <h5 class="text-danger">Reducción Restante</h5>
+        <p class="fs-4 fw-bold">{{ metricas.reduccion_restante }} tCO₂e</p>
+      </div>
+    </div>
+  </div>
+
+  {{ metricas|json_script:"metricas-data" }}
+  
+  <!-- Barra de progreso -->
+  <div class="mb-4">
+    <h5>Avance hacia la meta</h5>
+    <div class="progress" style="height: 30px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+           role="progressbar"
+           data-progress="{{ metricas.porcentaje_avance }}%;"
+           aria-valuenow="{{ metricas.porcentaje_avance }}"
+           aria-valuemin="0" aria-valuemax="100">
+        {{ metricas.porcentaje_avance }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de donut -->
+    <div class="d-flex justify-content-center mt-5">
+    <div style="max-width: 350px;">
+        <canvas id="graficoMeta"></canvas>
+    </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const metricas = JSON.parse(document.getElementById('metricas-data').textContent);
+  
+  document.addEventListener("DOMContentLoaded", function() {
+  const bar = document.querySelector('.progress-bar');
+  const value = bar.getAttribute('data-progress');
+  bar.style.width = value + '%';
+    });
+    
+  const reduccion_lograda = metricas.reduccion_lograda;
+  const reduccion_restante = metricas.reduccion_restante;
+  const meta_total = metricas.meta_total;
+  const porcentaje_avance = metricas.porcentaje_avance;
+
+  const ctx = document.getElementById('graficoMeta');
+  const graficoMeta = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Avance', 'Restante'],
+      datasets: [{
+        data: [reduccion_lograda, reduccion_restante],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(220, 53, 69, 0.5)'
+        ],
+        borderColor: ['rgba(255,255,255,1)'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        title: {
+          display: true,
+          text: 'Avance hacia Carbono Neutralidad',
+          font: { size: 16 }
+        }
+      }
+    }
+  });
+</script>
+</main>
+{% endblock %}

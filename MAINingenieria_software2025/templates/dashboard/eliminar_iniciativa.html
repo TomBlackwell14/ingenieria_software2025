@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Coordinador · Cencosud Gases Free{% endblock %}
+{% block page_class %}dashboard-analista{% endblock %}
+
+{% block content %}
+<section class="card shadow-sm p-4 mb-5 bg-white rounded">
+  <h1 class="text-center text-danger mb-4">Eliminar Iniciativa</h1>
+
+  <p class="text-center fs-5">
+    ¿Seguro que deseas eliminar la iniciativa 
+    <strong>"{{ object.nombre }}"</strong>?  
+    Esta acción no se puede deshacer.
+  </p>
+
+  <form method="post" class="text-center mt-4">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger me-2">Sí, eliminar</button>
+    <a href="{% url 'dashboard:detalle_iniciativa' object.id %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</section>
+{% endblock %}
