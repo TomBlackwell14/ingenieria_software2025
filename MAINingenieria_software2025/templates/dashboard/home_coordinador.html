@@ -33,6 +33,7 @@
     <a href="{% url 'dashboard:crear_iniciativa' %}" class="btn btn-success">
       + Nueva Iniciativa
     </a>
+  <button class="btn btn-primary" onclick="mostrarMensaje()">Exportar</button>
   </div>
 
   <form method="get" class="d-flex mb-3" role="search">
@@ -151,7 +152,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
+  function mostrarMensaje() {
+    alert("Exportacion de Iniciativas exitosa!");
+  }
   const metricas = JSON.parse(document.getElementById('metricas-data').textContent);
 
   const totalActivas = metricas.total_activas;
